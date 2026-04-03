@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Streamlit (if reused somewhere)
+.streamlit/
+
+# Node / frontend (future)
+node_modules/
+.next/
+dist/
+build/
+
+# Testing
+.pytest_cache/
+.coverage
+
+# Temporary files
+*.tmp
+*.swp
