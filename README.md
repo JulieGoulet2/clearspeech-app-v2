@@ -2,7 +2,7 @@
 
 ClearSpeech is an AI communication assistant designed for people with communication difficulties (e.g. aphasia, non-native speakers, cognitive load).
 
-This repository contains the **next version of the application**, moving from a Streamlit prototype to a full web application.
+This reposiotory contains the **next version of the application**, moving from a Streamlit prototype to a full web application.
 
 ---
 
