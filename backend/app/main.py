@@ -1,5 +1,5 @@
 import time
-
+import os 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -78,3 +78,11 @@ async def clarify(request: ClarifyRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+        @app.get("/debug-env")
+async def debug_env():
+    value = os.getenv("OPENAI_API_KEY")
+    return {
+        "has_openai_key": value is not None,
+        "key_prefix": value[:7] if value else None,
+    }
