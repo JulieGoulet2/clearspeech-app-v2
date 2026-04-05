@@ -34,6 +34,16 @@ const btnNo =
 const btnCopy =
   `${btnBase} bg-emerald-800 text-white hover:bg-emerald-900 focus-visible:ring-emerald-600`;
 
+/** Base URL for the backend API (no trailing slash). Null if NEXT_PUBLIC_API_URL is unset. */
+const API_BASE_URL = (() => {
+  const raw = process.env.NEXT_PUBLIC_API_URL;
+  if (typeof raw !== "string" || raw.trim() === "") return null;
+  return raw.replace(/\/+$/, "");
+})();
+
+const MISSING_API_URL_MESSAGE =
+  "Configuration error: NEXT_PUBLIC_API_URL is not set. Add it to your environment (for example in .env.local: NEXT_PUBLIC_API_URL=http://localhost:8000) and rebuild the frontend.";
+
 export default function Home() {
   const [language, setLanguage] = useState<Lang>("en");
   const [message, setMessage] = useState("");
@@ -56,6 +66,11 @@ export default function Home() {
     setError("");
     setResult(null);
 
+    if (!API_BASE_URL) {
+      setError(MISSING_API_URL_MESSAGE);
+      return;
+    }
+
     if (!message.trim()) {
       setError(tr.errorEmptyMessage);
       return;
@@ -65,7 +80,7 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/rewrite", {
+      const response = await fetch(`${API_BASE_URL}/rewrite`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -99,6 +114,11 @@ export default function Home() {
   async function handleClarify() {
     setError("");
 
+    if (!API_BASE_URL) {
+      setError(MISSING_API_URL_MESSAGE);
+      return;
+    }
+
     if (!clarification.trim()) {
       setError(tr.errorEmptyClarification);
       return;
@@ -108,7 +128,7 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/clarify", {
+      const response = await fetch(`${API_BASE_URL}/clarify`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -222,6 +242,15 @@ export default function Home() {
             {tr.hostingNoticeBody}
           </p>
         </aside>
+
+        {!API_BASE_URL && (
+          <div
+            className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm leading-relaxed text-rose-950 shadow-sm dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-100"
+            role="alert"
+          >
+            <p className="font-semibold">{MISSING_API_URL_MESSAGE}</p>
+          </div>
+        )}
 
         <section className="space-y-3" aria-label={tr.languageLabel}>
           <label
@@ -342,7 +371,7 @@ export default function Home() {
               type="button"
               className={btnPrimary}
               onClick={handleRewrite}
-              disabled={loading}
+              disabled={loading || !API_BASE_URL}
             >
               {tr.getClearer}
             </button>
@@ -456,7 +485,7 @@ export default function Home() {
                 type="button"
                 className={btnPrimary}
                 onClick={handleClarify}
-                disabled={loading}
+                disabled={loading || !API_BASE_URL}
               >
                 {tr.updateSuggestion}
               </button>
