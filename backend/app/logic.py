@@ -13,8 +13,12 @@ def get_client():
     """Create the OpenAI client once and reuse it."""
     global _client
     if _client is None:
-        _client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise RuntimeError("OPENAI_API_KEY is missing from environment")
+        _client = OpenAI(api_key=api_key)
     return _client
+    
 
 
 SYSTEM_PROMPT = """
