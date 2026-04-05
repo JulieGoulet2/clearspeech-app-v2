@@ -72,3 +72,15 @@ async def clarify(request: ClarifyRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+@app.get("/debug-client")
+async def debug_client():
+    try:
+        client = logic.get_client()
+        return {
+            "client_created": client is not None
+        }
+    except Exception as e:
+        return {
+            "client_created": False,
+            "error": str(e)
+        }

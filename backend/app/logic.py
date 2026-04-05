@@ -8,17 +8,20 @@ load_dotenv()
 
 _client = None
 
-
 def get_client():
     """Create the OpenAI client once and reuse it."""
     global _client
     if _client is None:
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+
         if not api_key:
             raise RuntimeError("OPENAI_API_KEY is missing from environment")
+
+        print("[DEBUG] Creating OpenAI client, key prefix:", api_key[:7])
+
         _client = OpenAI(api_key=api_key)
+
     return _client
-    
 
 
 SYSTEM_PROMPT = """
