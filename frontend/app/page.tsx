@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import packageJson from "../package.json";
 import { isLang, t, type Lang } from "../lib/uiStrings";
 
 type RewriteResponse = {
@@ -205,7 +206,22 @@ export default function Home() {
           <p className="text-base text-neutral-600 dark:text-neutral-400">
             {tr.subtitle}
           </p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-500">
+            Version {packageJson.version}
+          </p>
         </header>
+
+        <aside
+          className="rounded-2xl border border-amber-200/90 bg-amber-50/95 p-4 text-sm leading-relaxed text-amber-950 shadow-sm dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-100"
+          aria-label={tr.hostingNoticeTitle}
+        >
+          <p className="font-semibold text-amber-950 dark:text-amber-50">
+            {tr.hostingNoticeTitle}
+          </p>
+          <p className="mt-2 text-amber-900/95 dark:text-amber-100/95">
+            {tr.hostingNoticeBody}
+          </p>
+        </aside>
 
         <section className="space-y-3" aria-label={tr.languageLabel}>
           <label

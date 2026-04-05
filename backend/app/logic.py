@@ -1,4 +1,5 @@
 import os
+import time
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -88,12 +89,15 @@ Output format:
 
 def _call_model(user_input: str) -> str:
     """Call the model and return raw text."""
+    t0 = time.perf_counter()
     response = get_client().responses.create(
         model="gpt-4.1-mini",
         instructions=SYSTEM_PROMPT,
         input=user_input,
         temperature=0.1,
     )
+    elapsed = time.perf_counter() - t0
+    print(f"[TIMING] OpenAI call: {elapsed:.2f}s")
     return response.output_text.strip()
 
 
