@@ -492,12 +492,22 @@ export default function Home() {
             </h2>
 
             <article className="space-y-3" aria-labelledby="original-message-label">
-              <h3
-                id="original-message-label"
-                className="text-sm font-medium text-neutral-600 dark:text-neutral-400"
-              >
-                {tr.yourMessage}
-              </h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <h3
+                  id="original-message-label"
+                  className="text-sm font-medium text-neutral-600 dark:text-neutral-400"
+                >
+                  {tr.yourMessage}
+                </h3>
+                <button
+                  type="button"
+                  className={btnSpeak}
+                  onClick={() => speak(message, language)}
+                  disabled={!message.trim()}
+                >
+                  {tr.readAloud}
+                </button>
+              </div>
               <div
                 className={`${cardClass} border-neutral-200 bg-neutral-50/80 dark:border-neutral-700 dark:bg-neutral-900/60`}
               >
@@ -540,22 +550,12 @@ export default function Home() {
             )}
 
             <article className="space-y-3" aria-labelledby="question-label">
-              <div className="flex flex-wrap items-center gap-2">
-                <h3
-                  id="question-label"
-                  className="text-sm font-medium text-neutral-600 dark:text-neutral-400"
-                >
-                  {tr.questionLabel}
-                </h3>
-                <button
-                  type="button"
-                  className={btnSpeak}
-                  onClick={() => speak(result.confirmation_question, language)}
-                  disabled={!result.confirmation_question.trim()}
-                >
-                  {tr.readAloud}
-                </button>
-              </div>
+              <h3
+                id="question-label"
+                className="text-sm font-medium text-neutral-600 dark:text-neutral-400"
+              >
+                {tr.questionLabel}
+              </h3>
               <div
                 className={`${cardClass} border-neutral-200 bg-neutral-50/80 dark:border-neutral-700 dark:bg-neutral-900/60`}
               >
