@@ -43,6 +43,7 @@ const MISSING_API_URL_MESSAGE =
   "Configuration error: NEXT_PUBLIC_API_URL is not set. Add it to your environment (for example in .env.local: NEXT_PUBLIC_API_URL=http://localhost:8000) and rebuild the frontend.";
 const SERVER_WAKE_UP_MESSAGE =
   "The server may be waking up after inactivity. Please wait about a minute and try again.";
+const FIRST_REQUEST_NOTE = "The first request may be slower after inactivity.";
 
 function getUserFriendlyRequestError(err: unknown, fallback: string): string {
   if (!(err instanceof Error)) return fallback;
@@ -381,6 +382,9 @@ export default function Home() {
             >
               {tr.getClearer}
             </button>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">
+              {FIRST_REQUEST_NOTE}
+            </p>
           </section>
         )}
 
