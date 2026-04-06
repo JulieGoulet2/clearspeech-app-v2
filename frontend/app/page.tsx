@@ -64,26 +64,61 @@ function speak(text: string, language: string) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
   if (!text.trim()) return;
 
-  const langCode =
+  const synthesis = window.speechSynthesis;
+  const primaryLangCode =
     language === "fr" ? "fr-FR" : language === "de" ? "de-DE" : "en-US";
+  const preferredLangCodes =
+    language === "fr"
+      ? ["fr-FR", "fr-CA", "fr"]
+      : language === "de"
+        ? ["de-DE", "de-AT", "de-CH", "de"]
+        : ["en-US", "en-GB", "en"];
 
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = langCode;
+  const speakWithVoices = (voices: SpeechSynthesisVoice[]) => {
+    synthesis.cancel();
+    synthesis.resume();
 
-  const voices = window.speechSynthesis.getVoices();
-  const targetLang = langCode.toLowerCase();
-  const targetPrefix = targetLang.split("-")[0];
-  const matchedVoice =
-    voices.find((voice) => voice.lang.toLowerCase() === targetLang) ??
-    voices.find((voice) => voice.lang.toLowerCase().startsWith(`${targetPrefix}-`)) ??
-    voices.find((voice) => voice.lang.toLowerCase() === targetPrefix);
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = primaryLangCode;
 
-  if (matchedVoice) {
-    utterance.voice = matchedVoice;
+    const normalizedVoices = voices.map((voice) => ({
+      voice,
+      lang: voice.lang.toLowerCase(),
+    }));
+    const matchedVoice = preferredLangCodes
+      .map((code) => code.toLowerCase())
+      .map(
+        (code) =>
+          normalizedVoices.find((entry) => entry.lang === code)?.voice ??
+          normalizedVoices.find((entry) => entry.lang.startsWith(`${code}-`))?.voice,
+      )
+      .find((voice): voice is SpeechSynthesisVoice => Boolean(voice));
+
+    if (matchedVoice) {
+      utterance.voice = matchedVoice;
+      utterance.lang = matchedVoice.lang;
+    }
+
+    synthesis.speak(utterance);
+  };
+
+  const voices = synthesis.getVoices();
+  if (voices.length > 0) {
+    speakWithVoices(voices);
+    return;
   }
 
-  window.speechSynthesis.speak(utterance);
+  const onVoicesChanged = () => {
+    synthesis.removeEventListener?.("voiceschanged", onVoicesChanged);
+    speakWithVoices(synthesis.getVoices());
+  };
+  synthesis.addEventListener?.("voiceschanged", onVoicesChanged);
+
+  // Fallback: if voiceschanged never fires, still attempt speech shortly after.
+  window.setTimeout(() => {
+    synthesis.removeEventListener?.("voiceschanged", onVoicesChanged);
+    speakWithVoices(synthesis.getVoices());
+  }, 250);
 }
 
 function getLanguageChoiceSpeechText(uiLanguage: Lang, selectedLanguage: Lang): string {
