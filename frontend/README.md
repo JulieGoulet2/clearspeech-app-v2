@@ -18,6 +18,25 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Frontend Testing
+
+This project uses **Jest** with **React Testing Library** for basic UI and API-interaction tests.
+
+Run tests:
+
+```bash
+npm test
+```
+
+Current tests are in `__tests__/page.test.tsx` and cover:
+
+- page render (title, textarea, primary button)
+- textarea typing interaction
+- rewrite button triggering a mocked `fetch` call with the expected payload
+- displaying mocked API response text in the UI
+
+Tests mock `global.fetch` with `jest.fn()`, so no real backend calls are made.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
