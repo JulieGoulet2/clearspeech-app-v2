@@ -44,6 +44,7 @@ export type UiStrings = {
   helpModel: string;
   helpShow: string;
   helpHide: string;
+  firstRequestNote: string;
 };
 
 export const UI_STRINGS: Record<Lang, UiStrings> = {
@@ -96,6 +97,7 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
       "Suggestions are generated using OpenAI’s GPT-4.1 mini model.",
     helpShow: "Show instructions",
     helpHide: "Hide instructions",
+    firstRequestNote: "The first request may be slower after inactivity.",
   },
   fr: {
     title: "ClearSpeech",
@@ -149,6 +151,7 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
       "Les propositions sont générées avec le modèle GPT-4.1 mini d’OpenAI.",
     helpShow: "Voir les instructions",
     helpHide: "Masquer les instructions",
+    firstRequestNote: "La première requête peut être plus lente après une période d’inactivité.",
   },
   de: {
     title: "ClearSpeech",
@@ -202,6 +205,7 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
       "Die Vorschläge werden mit dem Modell GPT-4.1 mini von OpenAI erzeugt.",
     helpShow: "Anleitung anzeigen",
     helpHide: "Anleitung ausblenden",
+    firstRequestNote: "Die erste Anfrage kann nach Inaktivität langsamer sein.",
   },
 };
 
