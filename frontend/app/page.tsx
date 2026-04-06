@@ -35,12 +35,10 @@ const btnCopy =
   `${btnBase} bg-emerald-800 text-white hover:bg-emerald-900 focus-visible:ring-emerald-600`;
 
 /** Base URL for the backend API (no trailing slash). Null if NEXT_PUBLIC_API_URL is unset. */
-const API_BASE_URL = (() => {
-  const raw = process.env.NEXT_PUBLIC_API_URL;
-  if (typeof raw !== "string" || raw.trim() === "") return null;
-  return raw.replace(/\/+$/, "");
-})();
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+if (!API_BASE_URL) {
+  throw new Error("Missing NEXT_PUBLIC_API_URL environment variable");
+}
 const MISSING_API_URL_MESSAGE =
   "Configuration error: NEXT_PUBLIC_API_URL is not set. Add it to your environment (for example in .env.local: NEXT_PUBLIC_API_URL=http://localhost:8000) and rebuild the frontend.";
 
