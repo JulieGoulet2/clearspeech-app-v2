@@ -164,16 +164,6 @@ export default function Home() {
     tr.helpIncomplete,
     tr.helpCopyNote,
   ].join(" ");
-  const renderReadAloudButton = (text: string) => (
-    <button
-      type="button"
-      className={btnSpeak}
-      onClick={() => speak(text, language)}
-      disabled={!text.trim()}
-    >
-      {tr.readAloud}
-    </button>
-  );
 
   useEffect(() => {
     document.title = tr.title;
@@ -350,23 +340,12 @@ export default function Home() {
         )}
 
         <section className="space-y-3" aria-label={tr.languageLabel}>
-          <div className="flex flex-wrap items-center gap-2">
-            <label
-              className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-              htmlFor="lang-select"
-            >
-              {tr.languageLabel}
-            </label>
-            <button
-              type="button"
-              className={btnSpeak}
-              onClick={() =>
-                speak(getLanguageChoiceSpeechText(language, language), language)
-              }
-            >
-              {tr.readAloud}
-            </button>
-          </div>
+          <label
+            className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            htmlFor="lang-select"
+          >
+            {tr.languageLabel}
+          </label>
           <select
             id="lang-select"
             value={language}
@@ -394,7 +373,6 @@ export default function Home() {
             >
               {helpOpen ? tr.helpHide : tr.helpShow}
             </button>
-            {renderReadAloudButton(helpOpen ? tr.helpHide : tr.helpShow)}
           </div>
 
           {helpOpen && (
@@ -472,22 +450,12 @@ export default function Home() {
         {phase === "compose" && (
           <section className="space-y-6" aria-label={tr.yourMessage}>
             <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <label
-                  className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-                  htmlFor="user-message"
-                >
-                  {tr.yourMessage}
-                </label>
-                <button
-                  type="button"
-                  className={btnSpeak}
-                  onClick={() => speak(message, language)}
-                  disabled={!message.trim()}
-                >
-                  {tr.readAloud}
-                </button>
-              </div>
+              <label
+                className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                htmlFor="user-message"
+              >
+                {tr.yourMessage}
+              </label>
               <textarea
                 id="user-message"
                 value={message}
@@ -507,7 +475,6 @@ export default function Home() {
               >
                 {tr.getClearer}
               </button>
-              {renderReadAloudButton(tr.getClearer)}
             </div>
             <p className="text-sm text-neutral-600 dark:text-neutral-400">
               {tr.firstRequestNote}
@@ -525,22 +492,12 @@ export default function Home() {
             </h2>
 
             <article className="space-y-3" aria-labelledby="original-message-label">
-              <div className="flex flex-wrap items-center gap-2">
-                <h3
-                  id="original-message-label"
-                  className="text-sm font-medium text-neutral-600 dark:text-neutral-400"
-                >
-                  {tr.yourMessage}
-                </h3>
-                <button
-                  type="button"
-                  className={btnSpeak}
-                  onClick={() => speak(message, language)}
-                  disabled={!message.trim()}
-                >
-                  {tr.readAloud}
-                </button>
-              </div>
+              <h3
+                id="original-message-label"
+                className="text-sm font-medium text-neutral-600 dark:text-neutral-400"
+              >
+                {tr.yourMessage}
+              </h3>
               <div
                 className={`${cardClass} border-neutral-200 bg-neutral-50/80 dark:border-neutral-700 dark:bg-neutral-900/60`}
               >
@@ -620,12 +577,10 @@ export default function Home() {
               >
                 {tr.yes}
               </button>
-              {renderReadAloudButton(tr.yes)}
 
               <button type="button" className={btnNo} onClick={handleNo}>
                 {tr.no}
               </button>
-              {renderReadAloudButton(tr.no)}
 
               <button
                 type="button"
@@ -634,7 +589,6 @@ export default function Home() {
               >
                 {tr.startOver}
               </button>
-              {renderReadAloudButton(tr.startOver)}
             </div>
           </section>
         )}
@@ -673,7 +627,6 @@ export default function Home() {
               >
                 {tr.updateSuggestion}
               </button>
-              {renderReadAloudButton(tr.updateSuggestion)}
 
               <button
                 type="button"
@@ -682,7 +635,6 @@ export default function Home() {
               >
                 {tr.startOver}
               </button>
-              {renderReadAloudButton(tr.startOver)}
             </div>
           </section>
         )}
@@ -713,7 +665,6 @@ export default function Home() {
               <button type="button" className={btnCopy} onClick={handleCopy}>
                 {tr.copy}
               </button>
-              {renderReadAloudButton(tr.copy)}
 
               <button
                 type="button"
@@ -722,7 +673,6 @@ export default function Home() {
               >
                 {tr.newMessage}
               </button>
-              {renderReadAloudButton(tr.newMessage)}
             </div>
           </section>
         )}
