@@ -44,8 +44,6 @@ export type UiStrings = {
   helpModel: string;
   helpShow: string;
   helpHide: string;
-  hostingNoticeTitle: string;
-  hostingNoticeBody: string;
 };
 
 export const UI_STRINGS: Record<Lang, UiStrings> = {
@@ -98,9 +96,6 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
       "Suggestions are generated using OpenAI’s GPT-4.1 mini model.",
     helpShow: "Show instructions",
     helpHide: "Hide instructions",
-    hostingNoticeTitle: "Important before you start",
-    hostingNoticeBody:
-      "Render free services can sleep, so the first request after inactivity can be slow. That is normal on free hosting.",
   },
   fr: {
     title: "ClearSpeech",
@@ -154,9 +149,6 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
       "Les propositions sont générées avec le modèle GPT-4.1 mini d’OpenAI.",
     helpShow: "Voir les instructions",
     helpHide: "Masquer les instructions",
-    hostingNoticeTitle: "Avant de commencer",
-    hostingNoticeBody:
-      "Les services gratuits Render peuvent se mettre en veille : la première requête après une période d’inactivité peut être lente. C’est normal sur l’hébergement gratuit.",
   },
   de: {
     title: "ClearSpeech",
@@ -210,9 +202,6 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
       "Die Vorschläge werden mit dem Modell GPT-4.1 mini von OpenAI erzeugt.",
     helpShow: "Anleitung anzeigen",
     helpHide: "Anleitung ausblenden",
-    hostingNoticeTitle: "Wichtig vor dem Start",
-    hostingNoticeBody:
-      "Kostenlose Render-Dienste können schlafen: Die erste Anfrage nach längerer Inaktivität kann langsam sein. Das ist bei kostenlosem Hosting normal.",
   },
 };
 

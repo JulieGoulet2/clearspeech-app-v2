@@ -238,18 +238,6 @@ export default function Home() {
           </p>
         </header>
 
-        <aside
-          className="rounded-2xl border border-amber-200/90 bg-amber-50/95 p-4 text-sm leading-relaxed text-amber-950 shadow-sm dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-100"
-          aria-label={tr.hostingNoticeTitle}
-        >
-          <p className="font-semibold text-amber-950 dark:text-amber-50">
-            {tr.hostingNoticeTitle}
-          </p>
-          <p className="mt-2 text-amber-900/95 dark:text-amber-100/95">
-            {tr.hostingNoticeBody}
-          </p>
-        </aside>
-
         {!API_BASE_URL && (
           <div
             className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm leading-relaxed text-rose-950 shadow-sm dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-100"
@@ -396,6 +384,20 @@ export default function Home() {
             >
               {tr.proposedVersion}
             </h2>
+
+            <article className="space-y-3" aria-labelledby="original-message-label">
+              <h3
+                id="original-message-label"
+                className="text-sm font-medium text-neutral-600 dark:text-neutral-400"
+              >
+                {tr.yourMessage}
+              </h3>
+              <div
+                className={`${cardClass} border-neutral-200 bg-neutral-50/80 dark:border-neutral-700 dark:bg-neutral-900/60`}
+              >
+                <p className="whitespace-pre-wrap text-lg leading-relaxed">{message}</p>
+              </div>
+            </article>
 
             {result.proposed_sentence.startsWith("ERROR:") ? (
               <div
