@@ -41,6 +41,22 @@ if (!API_BASE_URL) {
 }
 const MISSING_API_URL_MESSAGE =
   "Configuration error: NEXT_PUBLIC_API_URL is not set. Add it to your environment (for example in .env.local: NEXT_PUBLIC_API_URL=http://localhost:8000) and rebuild the frontend.";
+const SERVER_WAKE_UP_MESSAGE =
+  "The server may be waking up after inactivity. Please wait about a minute and try again.";
+
+function getUserFriendlyRequestError(err: unknown, fallback: string): string {
+  if (!(err instanceof Error)) return fallback;
+
+  const message = err.message.trim();
+  const normalized = message.toLowerCase();
+  const isLikelyWakeUpOrNetworkIssue =
+    normalized === "failed to fetch" ||
+    normalized === "load failed" ||
+    normalized.includes("networkerror") ||
+    normalized.includes("network request failed");
+
+  return isLikelyWakeUpOrNetworkIssue ? SERVER_WAKE_UP_MESSAGE : message || fallback;
+}
 
 export default function Home() {
   const [language, setLanguage] = useState<Lang>("en");
@@ -98,11 +114,7 @@ export default function Home() {
       setResult(data);
       setPhase("confirm");
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(tr.errorUnknown);
-      }
+      setError(getUserFriendlyRequestError(err, tr.errorUnknown));
     } finally {
       setLoading(false);
       setLoadingKind(null);
@@ -148,11 +160,7 @@ export default function Home() {
       setClarification("");
       setPhase("confirm");
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(tr.errorUnknown);
-      }
+      setError(getUserFriendlyRequestError(err, tr.errorUnknown));
     } finally {
       setLoading(false);
       setLoadingKind(null);
