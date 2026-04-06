@@ -70,6 +70,19 @@ function speak(text: string, language: string) {
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = langCode;
+
+  const voices = window.speechSynthesis.getVoices();
+  const targetLang = langCode.toLowerCase();
+  const targetPrefix = targetLang.split("-")[0];
+  const matchedVoice =
+    voices.find((voice) => voice.lang.toLowerCase() === targetLang) ??
+    voices.find((voice) => voice.lang.toLowerCase().startsWith(`${targetPrefix}-`)) ??
+    voices.find((voice) => voice.lang.toLowerCase() === targetPrefix);
+
+  if (matchedVoice) {
+    utterance.voice = matchedVoice;
+  }
+
   window.speechSynthesis.speak(utterance);
 }
 
@@ -86,6 +99,20 @@ export default function Home() {
   const [helpOpen, setHelpOpen] = useState(false);
 
   const tr = t(language);
+  const helpTextToRead = [
+    tr.helpTitle,
+    tr.helpWhatTitle,
+    tr.helpWhatBody,
+    tr.helpHowTitle,
+    tr.helpStep1,
+    tr.helpStep2,
+    tr.helpStep3,
+    tr.helpStep4,
+    tr.helpStep5,
+    tr.helpTipsTitle,
+    tr.helpIncomplete,
+    tr.helpCopyNote,
+  ].join(" ");
 
   useEffect(() => {
     document.title = tr.title;
@@ -302,12 +329,22 @@ export default function Home() {
               aria-labelledby="help-panel-title"
               className="rounded-2xl border border-neutral-200/90 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-950 md:p-6"
             >
-              <h2
-                id="help-panel-title"
-                className="mb-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100"
-              >
-                {tr.helpTitle}
-              </h2>
+              <div className="mb-4 flex flex-wrap items-center gap-2">
+                <h2
+                  id="help-panel-title"
+                  className="text-lg font-semibold text-neutral-900 dark:text-neutral-100"
+                >
+                  {tr.helpTitle}
+                </h2>
+                <button
+                  type="button"
+                  className={btnSpeak}
+                  onClick={() => speak(helpTextToRead, language)}
+                  disabled={!helpTextToRead.trim()}
+                >
+                  {tr.readAloud}
+                </button>
+              </div>
               <div className="space-y-6 text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">
                 <section>
                   <h3 className="mb-2 text-base font-semibold text-neutral-900 dark:text-neutral-100">
@@ -438,7 +475,7 @@ export default function Home() {
                     onClick={() => speak(result.proposed_sentence, language)}
                     disabled={!result.proposed_sentence.trim()}
                   >
-                    🔊 Read aloud
+                    {tr.readAloud}
                   </button>
                 </div>
                 <div className={cardClass}>
@@ -461,7 +498,7 @@ export default function Home() {
                   onClick={() => speak(result.confirmation_question, language)}
                   disabled={!result.confirmation_question.trim()}
                 >
-                  🔊 Read aloud
+                  {tr.readAloud}
                 </button>
               </div>
               <div
