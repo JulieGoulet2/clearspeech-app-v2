@@ -33,6 +33,8 @@ const btnNo =
 
 const btnCopy =
   `${btnBase} bg-emerald-800 text-white hover:bg-emerald-900 focus-visible:ring-emerald-600`;
+const btnSpeak =
+  `${btnBase} min-h-0 min-w-0 px-4 py-2 text-sm border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50 focus-visible:ring-neutral-400 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800`;
 
 /** Base URL for the backend API (no trailing slash). Null if NEXT_PUBLIC_API_URL is unset. */
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -56,6 +58,19 @@ function getUserFriendlyRequestError(err: unknown, fallback: string): string {
     normalized.includes("network request failed");
 
   return isLikelyWakeUpOrNetworkIssue ? SERVER_WAKE_UP_MESSAGE : message || fallback;
+}
+
+function speak(text: string, language: string) {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  if (!text.trim()) return;
+
+  const langCode =
+    language === "fr" ? "fr-FR" : language === "de" ? "de-DE" : "en-US";
+
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = langCode;
+  window.speechSynthesis.speak(utterance);
 }
 
 export default function Home() {
@@ -410,12 +425,22 @@ export default function Home() {
               </div>
             ) : (
               <article className="space-y-3" aria-labelledby="sentence-label">
-                <h3
-                  id="sentence-label"
-                  className="text-sm font-medium text-neutral-600 dark:text-neutral-400"
-                >
-                  {tr.suggestedSentence}
-                </h3>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3
+                    id="sentence-label"
+                    className="text-sm font-medium text-neutral-600 dark:text-neutral-400"
+                  >
+                    {tr.suggestedSentence}
+                  </h3>
+                  <button
+                    type="button"
+                    className={btnSpeak}
+                    onClick={() => speak(result.proposed_sentence, language)}
+                    disabled={!result.proposed_sentence.trim()}
+                  >
+                    🔊 Read aloud
+                  </button>
+                </div>
                 <div className={cardClass}>
                   <p className="text-lg leading-relaxed">{result.proposed_sentence}</p>
                 </div>
@@ -423,12 +448,22 @@ export default function Home() {
             )}
 
             <article className="space-y-3" aria-labelledby="question-label">
-              <h3
-                id="question-label"
-                className="text-sm font-medium text-neutral-600 dark:text-neutral-400"
-              >
-                {tr.questionLabel}
-              </h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <h3
+                  id="question-label"
+                  className="text-sm font-medium text-neutral-600 dark:text-neutral-400"
+                >
+                  {tr.questionLabel}
+                </h3>
+                <button
+                  type="button"
+                  className={btnSpeak}
+                  onClick={() => speak(result.confirmation_question, language)}
+                  disabled={!result.confirmation_question.trim()}
+                >
+                  🔊 Read aloud
+                </button>
+              </div>
               <div
                 className={`${cardClass} border-neutral-200 bg-neutral-50/80 dark:border-neutral-700 dark:bg-neutral-900/60`}
               >
