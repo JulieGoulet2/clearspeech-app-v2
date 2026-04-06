@@ -164,6 +164,16 @@ export default function Home() {
     tr.helpIncomplete,
     tr.helpCopyNote,
   ].join(" ");
+  const renderReadAloudButton = (text: string) => (
+    <button
+      type="button"
+      className={btnSpeak}
+      onClick={() => speak(text, language)}
+      disabled={!text.trim()}
+    >
+      {tr.readAloud}
+    </button>
+  );
 
   useEffect(() => {
     document.title = tr.title;
@@ -373,16 +383,19 @@ export default function Home() {
         </section>
 
         <div className="space-y-3">
-          <button
-            type="button"
-            id="help-toggle"
-            className={`${btnSecondary} w-full sm:w-auto`}
-            onClick={() => setHelpOpen((open) => !open)}
-            aria-expanded={helpOpen}
-            aria-controls="help-panel"
-          >
-            {helpOpen ? tr.helpHide : tr.helpShow}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              id="help-toggle"
+              className={`${btnSecondary} w-full sm:w-auto`}
+              onClick={() => setHelpOpen((open) => !open)}
+              aria-expanded={helpOpen}
+              aria-controls="help-panel"
+            >
+              {helpOpen ? tr.helpHide : tr.helpShow}
+            </button>
+            {renderReadAloudButton(helpOpen ? tr.helpHide : tr.helpShow)}
+          </div>
 
           {helpOpen && (
             <div
@@ -485,14 +498,17 @@ export default function Home() {
               />
             </div>
 
-            <button
-              type="button"
-              className={btnPrimary}
-              onClick={handleRewrite}
-              disabled={loading || !API_BASE_URL}
-            >
-              {tr.getClearer}
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                className={btnPrimary}
+                onClick={handleRewrite}
+                disabled={loading || !API_BASE_URL}
+              >
+                {tr.getClearer}
+              </button>
+              {renderReadAloudButton(tr.getClearer)}
+            </div>
             <p className="text-sm text-neutral-600 dark:text-neutral-400">
               {tr.firstRequestNote}
             </p>
@@ -604,10 +620,12 @@ export default function Home() {
               >
                 {tr.yes}
               </button>
+              {renderReadAloudButton(tr.yes)}
 
               <button type="button" className={btnNo} onClick={handleNo}>
                 {tr.no}
               </button>
+              {renderReadAloudButton(tr.no)}
 
               <button
                 type="button"
@@ -616,6 +634,7 @@ export default function Home() {
               >
                 {tr.startOver}
               </button>
+              {renderReadAloudButton(tr.startOver)}
             </div>
           </section>
         )}
@@ -645,7 +664,7 @@ export default function Home() {
               />
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <button
                 type="button"
                 className={btnPrimary}
@@ -654,6 +673,7 @@ export default function Home() {
               >
                 {tr.updateSuggestion}
               </button>
+              {renderReadAloudButton(tr.updateSuggestion)}
 
               <button
                 type="button"
@@ -662,6 +682,7 @@ export default function Home() {
               >
                 {tr.startOver}
               </button>
+              {renderReadAloudButton(tr.startOver)}
             </div>
           </section>
         )}
@@ -692,6 +713,7 @@ export default function Home() {
               <button type="button" className={btnCopy} onClick={handleCopy}>
                 {tr.copy}
               </button>
+              {renderReadAloudButton(tr.copy)}
 
               <button
                 type="button"
@@ -700,6 +722,7 @@ export default function Home() {
               >
                 {tr.newMessage}
               </button>
+              {renderReadAloudButton(tr.newMessage)}
             </div>
           </section>
         )}
