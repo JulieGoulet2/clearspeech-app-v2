@@ -86,6 +86,22 @@ function speak(text: string, language: string) {
   window.speechSynthesis.speak(utterance);
 }
 
+function getLanguageChoiceSpeechText(uiLanguage: Lang, selectedLanguage: Lang): string {
+  const prefixByUiLanguage: Record<Lang, string> = {
+    en: "Selected language",
+    fr: "Langue sélectionnée",
+    de: "Ausgewählte Sprache",
+  };
+
+  const languageNameByUiLanguage: Record<Lang, Record<Lang, string>> = {
+    en: { en: "English", fr: "French", de: "German" },
+    fr: { en: "anglais", fr: "français", de: "allemand" },
+    de: { en: "Englisch", fr: "Französisch", de: "Deutsch" },
+  };
+
+  return `${prefixByUiLanguage[uiLanguage]}: ${languageNameByUiLanguage[uiLanguage][selectedLanguage]}.`;
+}
+
 export default function Home() {
   const [language, setLanguage] = useState<Lang>("en");
   const [message, setMessage] = useState("");
@@ -289,12 +305,23 @@ export default function Home() {
         )}
 
         <section className="space-y-3" aria-label={tr.languageLabel}>
-          <label
-            className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-            htmlFor="lang-select"
-          >
-            {tr.languageLabel}
-          </label>
+          <div className="flex flex-wrap items-center gap-2">
+            <label
+              className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              htmlFor="lang-select"
+            >
+              {tr.languageLabel}
+            </label>
+            <button
+              type="button"
+              className={btnSpeak}
+              onClick={() =>
+                speak(getLanguageChoiceSpeechText(language, language), language)
+              }
+            >
+              {tr.readAloud}
+            </button>
+          </div>
           <select
             id="lang-select"
             value={language}
@@ -397,12 +424,22 @@ export default function Home() {
         {phase === "compose" && (
           <section className="space-y-6" aria-label={tr.yourMessage}>
             <div className="space-y-2">
-              <label
-                className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-                htmlFor="user-message"
-              >
-                {tr.yourMessage}
-              </label>
+              <div className="flex flex-wrap items-center gap-2">
+                <label
+                  className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                  htmlFor="user-message"
+                >
+                  {tr.yourMessage}
+                </label>
+                <button
+                  type="button"
+                  className={btnSpeak}
+                  onClick={() => speak(message, language)}
+                  disabled={!message.trim()}
+                >
+                  {tr.readAloud}
+                </button>
+              </div>
               <textarea
                 id="user-message"
                 value={message}
@@ -437,12 +474,22 @@ export default function Home() {
             </h2>
 
             <article className="space-y-3" aria-labelledby="original-message-label">
-              <h3
-                id="original-message-label"
-                className="text-sm font-medium text-neutral-600 dark:text-neutral-400"
-              >
-                {tr.yourMessage}
-              </h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <h3
+                  id="original-message-label"
+                  className="text-sm font-medium text-neutral-600 dark:text-neutral-400"
+                >
+                  {tr.yourMessage}
+                </h3>
+                <button
+                  type="button"
+                  className={btnSpeak}
+                  onClick={() => speak(message, language)}
+                  disabled={!message.trim()}
+                >
+                  {tr.readAloud}
+                </button>
+              </div>
               <div
                 className={`${cardClass} border-neutral-200 bg-neutral-50/80 dark:border-neutral-700 dark:bg-neutral-900/60`}
               >
@@ -586,12 +633,22 @@ export default function Home() {
 
         {phase === "final" && (
           <section className="space-y-6" aria-labelledby="final-heading">
-            <h2
-              id="final-heading"
-              className="text-xl font-semibold text-neutral-900 dark:text-neutral-100"
-            >
-              {tr.finalText}
-            </h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2
+                id="final-heading"
+                className="text-xl font-semibold text-neutral-900 dark:text-neutral-100"
+              >
+                {tr.finalText}
+              </h2>
+              <button
+                type="button"
+                className={btnSpeak}
+                onClick={() => speak(finalText, language)}
+                disabled={!finalText.trim()}
+              >
+                {tr.readAloud}
+              </button>
+            </div>
             <div className={cardClass}>
               <p className="text-lg leading-relaxed">{finalText}</p>
             </div>
