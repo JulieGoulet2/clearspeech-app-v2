@@ -46,6 +46,14 @@ export type UiStrings = {
   helpHide: string;
   readAloud: string;
   firstRequestNote: string;
+  voiceInputBetaLabel: string;
+  voiceInputBetaStopLabel: string;
+  voiceInputBetaNote: string;
+  voiceInputSafariWarning: string;
+  voiceInputSafariOnlyNote: string;
+  helpVoiceTitle: string;
+  helpVoiceReadAloud: string;
+  helpVoiceDictation: string;
 };
 
 export const UI_STRINGS: Record<Lang, UiStrings> = {
@@ -100,6 +108,16 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
     helpHide: "Hide instructions",
     readAloud: "🔊 Read aloud",
     firstRequestNote: "The first request may be slower after inactivity.",
+    voiceInputBetaLabel: "🎤 Voice input (Beta)",
+    voiceInputBetaStopLabel: "🔴 Stop voice input (Beta)",
+    voiceInputBetaNote: "Tap the button, wait 1–2 seconds, then speak. Voice input is a beta feature and may require retry.",
+    voiceInputSafariWarning:
+      "Voice dictation works best in Safari or Chrome. Please use typing in this browser.",
+    voiceInputSafariOnlyNote: "⚠️ Voice dictation is available in Safari and Chrome.",
+    helpVoiceTitle: "Voice & audio features",
+    helpVoiceReadAloud: "Any text in the app can be read aloud using the 🔊 Read aloud buttons.",
+    helpVoiceDictation:
+      "You can dictate your message using the 🎤 Voice input button instead of typing.",
   },
   fr: {
     title: "ClearSpeech",
@@ -155,6 +173,18 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
     helpHide: "Masquer les instructions",
     readAloud: "🔊 Lire à voix haute",
     firstRequestNote: "La première requête peut être plus lente après une période d’inactivité.",
+    voiceInputBetaLabel: "🎤 Saisie vocale (Bêta)",
+    voiceInputBetaStopLabel: "🔴 Arrêter la saisie vocale (Bêta)",
+    voiceInputBetaNote:
+      "Appuie sur le bouton, attends 1–2 secondes, puis parle. La saisie vocale est une fonction bêta et peut nécessiter un nouvel essai.",
+    voiceInputSafariWarning:
+      "La dictée vocale fonctionne mieux dans Safari ou Chrome. Veuillez utiliser le clavier dans ce navigateur.",
+    voiceInputSafariOnlyNote: "⚠️ La dictée vocale est disponible dans Safari et Chrome.",
+    helpVoiceTitle: "Fonctions vocales et audio",
+    helpVoiceReadAloud:
+      "Tous les textes de l'application peuvent être lus à voix haute grâce aux boutons 🔊 Lire à voix haute.",
+    helpVoiceDictation:
+      "Tu peux dicter ton message avec le bouton 🎤 Saisie vocale au lieu de taper.",
   },
   de: {
     title: "ClearSpeech",
@@ -210,6 +240,18 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
     helpHide: "Anleitung ausblenden",
     readAloud: "🔊 Vorlesen",
     firstRequestNote: "Die erste Anfrage kann nach Inaktivität langsamer sein.",
+    voiceInputBetaLabel: "🎤 Spracheingabe (Beta)",
+    voiceInputBetaStopLabel: "🔴 Spracheingabe stoppen (Beta)",
+    voiceInputBetaNote:
+      "Tippe auf den Knopf, warte 1–2 Sekunden, dann sprich. Die Spracheingabe ist eine Beta-Funktion und kann einen erneuten Versuch erfordern.",
+    voiceInputSafariWarning:
+      "Die Spracheingabe funktioniert am besten in Safari oder Chrome. Bitte verwenden Sie in diesem Browser die Tastatureingabe.",
+    voiceInputSafariOnlyNote: "⚠️ Die Spracheingabe ist in Safari und Chrome verfügbar.",
+    helpVoiceTitle: "Sprach- und Audiofunktionen",
+    helpVoiceReadAloud:
+      "Alle Texte in der App können mit den Schaltflächen 🔊 Vorlesen laut vorgelesen werden.",
+    helpVoiceDictation:
+      "Du kannst deine Nachricht mit dem Knopf 🎤 Spracheingabe diktieren, anstatt zu tippen.",
   },
 };
 

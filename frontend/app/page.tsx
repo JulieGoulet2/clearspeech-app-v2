@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import packageJson from "../package.json";
 import { isLang, t, type Lang } from "../lib/uiStrings";
+import { convertToWav } from "../lib/audioUtils";
 
 type RewriteResponse = {
   proposed_sentence: string;
@@ -12,6 +13,33 @@ type RewriteResponse = {
 type Phase = "compose" | "confirm" | "clarify" | "final";
 
 type LoadingKind = "rewrite" | "clarify" | null;
+type BrowserKind = "safari" | "chromium" | "other" | "unknown";
+
+// Web Speech API — not yet in TypeScript's standard lib
+interface ISpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: ISpeechRecognitionEvent) => void) | null;
+  onerror: ((event: ISpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+interface ISpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+interface ISpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+declare global {
+  interface Window {
+    SpeechRecognition?: new () => ISpeechRecognition;
+    webkitSpeechRecognition?: new () => ISpeechRecognition;
+  }
+}
 
 const cardClass =
   "rounded-2xl border border-neutral-200/90 bg-white p-5 text-neutral-900 shadow-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 md:p-6";
@@ -45,6 +73,9 @@ const MISSING_API_URL_MESSAGE =
   "Configuration error: NEXT_PUBLIC_API_URL is not set. Add it to your environment (for example in .env.local: NEXT_PUBLIC_API_URL=http://localhost:8000) and rebuild the frontend.";
 const SERVER_WAKE_UP_MESSAGE =
   "The server may be waking up after inactivity. Please wait about a minute and try again.";
+const MIN_RECORDING_DURATION_MS = 900;
+const MIN_AUDIO_BLOB_BYTES = 120;
+const RECORDER_TIMESLICE_MS = 250;
 
 function getUserFriendlyRequestError(err: unknown, fallback: string): string {
   if (!(err instanceof Error)) return fallback;
@@ -121,22 +152,6 @@ function speak(text: string, language: string) {
   }, 250);
 }
 
-function getLanguageChoiceSpeechText(uiLanguage: Lang, selectedLanguage: Lang): string {
-  const prefixByUiLanguage: Record<Lang, string> = {
-    en: "Selected language",
-    fr: "Langue sélectionnée",
-    de: "Ausgewählte Sprache",
-  };
-
-  const languageNameByUiLanguage: Record<Lang, Record<Lang, string>> = {
-    en: { en: "English", fr: "French", de: "German" },
-    fr: { en: "anglais", fr: "français", de: "allemand" },
-    de: { en: "Englisch", fr: "Französisch", de: "Deutsch" },
-  };
-
-  return `${prefixByUiLanguage[uiLanguage]}: ${languageNameByUiLanguage[uiLanguage][selectedLanguage]}.`;
-}
-
 export default function Home() {
   const [language, setLanguage] = useState<Lang>("en");
   const [message, setMessage] = useState("");
@@ -147,9 +162,18 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [loadingKind, setLoadingKind] = useState<LoadingKind>(null);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [helpOpen, setHelpOpen] = useState(false);
-
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [browserKind, setBrowserKind] = useState<BrowserKind>("unknown");
+  const [recordingTarget, setRecordingTarget] = useState<"message" | "clarification">("message");
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<BlobPart[]>([]);
+  const recordingStartMsRef = useRef<number>(0);
   const tr = t(language);
+  const isDictationPreferredBrowser = browserKind === "safari" || browserKind === "chromium";
   const helpTextToRead = [
     tr.helpTitle,
     tr.helpWhatTitle,
@@ -169,8 +193,233 @@ export default function Home() {
     document.title = tr.title;
   }, [tr.title]);
 
+  useEffect(() => {
+    return () => {
+      mediaRecorderRef.current?.stop();
+      mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined") return;
+    const ua = navigator.userAgent.toLowerCase();
+    const isSafari =
+      (ua.includes("safari") || ua.includes("mobile/")) &&
+      !ua.includes("chrome") &&
+      !ua.includes("crios") &&
+      !ua.includes("chromium") &&
+      !ua.includes("edg") &&
+      !ua.includes("opr");
+    const isChromiumFamily =
+      ua.includes("chrome") ||
+      ua.includes("crios") ||
+      ua.includes("chromium") ||
+      ua.includes("edg") ||
+      ua.includes("opr");
+    if (isSafari) {
+      setBrowserKind("safari");
+      return;
+    }
+    if (isChromiumFamily) {
+      setBrowserKind("chromium");
+      return;
+    }
+    setBrowserKind("other");
+  }, []);
+
+  function recordingMimeType(): string {
+    if (typeof window === "undefined" || typeof MediaRecorder === "undefined") return "";
+    const preferredMimeTypes = [
+      "audio/webm;codecs=opus",
+      "audio/webm",
+      "audio/mp4",
+    ];
+    for (const type of preferredMimeTypes) {
+      if (MediaRecorder.isTypeSupported(type)) return type;
+    }
+    return "";
+  }
+
+  function languageToLocale(language: Lang): string {
+    return language === "fr" ? "fr" : language === "de" ? "de" : "en";
+  }
+
+  async function handleStartRecording(target: "message" | "clarification" = "message") {
+    setError("");
+    setNotice("");
+    setRecordingTarget(target);
+
+    // --- All browsers: MediaRecorder → WAV → OpenAI Whisper transcription ---
+    // Chrome records WebM/Opus which is converted to WAV via convertToWav before upload.
+    // Safari records audio/mp4 which is sent as-is (OpenAI handles it reliably).
+    if (typeof window === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+      setError("Audio recording is not supported in this browser.");
+      return;
+    }
+    try {
+      const activeTarget = target;
+      // Prefer the real built-in microphone over virtual audio devices
+      // (e.g. "Microsoft Teams Audio Device (Virtual)", Zoom, etc.)
+      // that Chrome may select as the system default.
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioInputs = devices.filter((d) => d.kind === "audioinput");
+      const VIRTUAL_KEYWORDS = ["virtual", "teams", "zoom", "aggregate", "blackhole", "soundflower", "loopback"];
+      const realMic = audioInputs.find(
+        (d) => !VIRTUAL_KEYWORDS.some((kw) => d.label.toLowerCase().includes(kw)),
+      );
+      const audioConstraints: MediaTrackConstraints = {
+        echoCancellation: true,
+        noiseSuppression: false,
+        autoGainControl: true,
+        ...(realMic ? { deviceId: { exact: realMic.deviceId } } : {}),
+      };
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
+      console.info("[STT] Selected mic:", realMic?.label ?? "browser default");
+
+      const mimeType = recordingMimeType();
+      const recorderOptions: MediaRecorderOptions = mimeType
+        ? { mimeType, audioBitsPerSecond: 64000 }
+        : { audioBitsPerSecond: 64000 };
+      const recorder = new MediaRecorder(stream, recorderOptions);
+      console.info("[STT] Recording start:", {
+        target: activeTarget,
+        mimeType: mimeType || "browser_default",
+      });
+
+      mediaStreamRef.current = stream;
+      mediaRecorderRef.current = recorder;
+      chunksRef.current = [];
+      recordingStartMsRef.current = Date.now();
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+          console.info("[STT] Chunk captured:", {
+            chunkBytes: event.data.size,
+            chunkCount: chunksRef.current.length,
+          });
+        }
+      };
+      recorder.onstop = () => {
+        // Defer blob assembly by one microtask tick so Safari's final
+        // ondataavailable event fires before we read chunksRef.current.
+        setTimeout(async () => {
+        console.info("[STT] Recording stop:", { target: activeTarget });
+        setIsRecording(false);
+        stream.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+        mediaRecorderRef.current = null;
+
+        const blob = new Blob(chunksRef.current, { type: mimeType || "audio/webm" });
+        const elapsedMs = Date.now() - recordingStartMsRef.current;
+        const chunkCount = chunksRef.current.length;
+        chunksRef.current = [];
+        console.info("[STT] Blob ready:", {
+          sizeBytes: blob.size,
+          elapsedMs,
+          chunkCount,
+          mimeType: blob.type || mimeType || "audio/webm",
+        });
+        if (blob.size === 0) {
+          setError("No audio was recorded. Please try again. (reason: empty recording)");
+          return;
+        }
+        if (elapsedMs < MIN_RECORDING_DURATION_MS) {
+          setError(
+            `No audio was recorded. Please try again. (reason: duration too short ${elapsedMs}ms < ${MIN_RECORDING_DURATION_MS}ms)`,
+          );
+          setNotice("");
+          return;
+        }
+        if (blob.size < MIN_AUDIO_BLOB_BYTES) {
+          setError(
+            `No audio was recorded. Please try again. (reason: blob too small ${blob.size} bytes < ${MIN_AUDIO_BLOB_BYTES} bytes)`,
+          );
+          setNotice("");
+          return;
+        }
+
+        setIsTranscribing(true);
+        try {
+          // Chrome: send raw WebM/Opus chunks concatenated — whisper-1 handles it natively.
+          //         AudioContext WAV conversion loses the beginning of chunked WebM.
+          // Safari: convert to WAV — AudioContext handles Safari's MP4 chunks correctly.
+          let file: File;
+          if (browserKind === "safari") {
+            file = await convertToWav(blob);
+          } else {
+            file = new File([blob], "recording.webm", { type: blob.type || "audio/webm;codecs=opus" });
+            console.info("[STT] Chrome: sending raw webm, size:", blob.size);
+          }
+          const formData = new FormData();
+          formData.append("audio", file);
+          formData.append("language_hint", languageToLocale(language));
+          console.info("[STT] Upload start:", {
+            sizeBytes: blob.size,
+            mimeType: file.type,
+            target: activeTarget,
+          });
+          const response = await fetch(`${API_BASE_URL}/transcribe`, {
+            method: "POST",
+            body: formData,
+          });
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || tr.errorRequest);
+          }
+          const data: { transcript?: string; text?: string } = await response.json();
+          console.info("[STT] Returned JSON:", data);
+          const transcript = (data.transcript ?? data.text ?? "").trim();
+          console.info("[STT] Extracted transcript:", transcript);
+          if (!transcript) {
+            setError("Speech was recorded, but no usable transcript was produced. (reason: empty transcript)");
+            setNotice("");
+            return;
+          }
+          if (activeTarget === "clarification") {
+            setClarification((prev) => {
+              const base = prev.trim();
+              const next = base ? `${prev.replace(/\s+$/, "")} ${transcript}` : transcript;
+              console.info("[STT] Clarification textarea state updated");
+              return next;
+            });
+          } else {
+            setMessage((prev) => {
+              const base = prev.trim();
+              const next = base ? `${prev.replace(/\s+$/, "")} ${transcript}` : transcript;
+              console.info("[STT] Message textarea state updated");
+              return next;
+            });
+          }
+          setNotice("Transcript inserted. Please check and edit it.");
+        } catch (err) {
+          setError(getUserFriendlyRequestError(err, tr.errorUnknown));
+          setNotice("");
+        } finally {
+          setIsTranscribing(false);
+        }
+        }, 0); // end setTimeout
+      };
+
+      // All browsers need timeslice — without it Chrome only delivers ~600 bytes
+      // (WebM header only, no audio data) on stop().
+      recorder.start(RECORDER_TIMESLICE_MS);
+      setIsRecording(true);
+    } catch {
+      setError("Microphone access failed. Please allow microphone access and try again.");
+      setIsRecording(false);
+    }
+  }
+
+  function handleStopRecording() {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder) return;
+    recorder.stop();
+  }
+
   async function handleRewrite() {
     setError("");
+    setNotice("");
     setResult(null);
 
     if (!API_BASE_URL) {
@@ -216,6 +465,7 @@ export default function Home() {
 
   async function handleClarify() {
     setError("");
+    setNotice("");
 
     if (!API_BASE_URL) {
       setError(MISSING_API_URL_MESSAGE);
@@ -278,6 +528,7 @@ export default function Home() {
     setResult(null);
     setFinalText("");
     setError("");
+    setNotice("");
     setPhase("compose");
   }
 
@@ -427,6 +678,18 @@ export default function Home() {
                   </ul>
                 </section>
                 <section>
+                  <h3 className="mb-2 text-base font-semibold text-neutral-900 dark:text-neutral-100">
+                    {tr.helpVoiceTitle}
+                  </h3>
+                  <ul className="list-disc space-y-1 pl-5">
+                    <li>{tr.helpVoiceReadAloud}</li>
+                    <li>{tr.helpVoiceDictation}</li>
+                  </ul>
+                  <p className="mt-2 font-semibold text-rose-700 dark:text-rose-400">
+                    {tr.voiceInputSafariOnlyNote}
+                  </p>
+                </section>
+                <section>
                   <p className="font-medium text-neutral-900 dark:text-neutral-100">
                     {tr.helpContact}
                   </p>
@@ -456,6 +719,35 @@ export default function Home() {
               >
                 {tr.yourMessage}
               </label>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  className={btnSpeak}
+                  onClick={() =>
+                    isRecording && recordingTarget === "message"
+                      ? handleStopRecording()
+                      : handleStartRecording("message")
+                  }
+                  disabled={isTranscribing || !isDictationPreferredBrowser}
+                >
+                  {isRecording && recordingTarget === "message"
+                    ? tr.voiceInputBetaStopLabel
+                    : tr.voiceInputBetaLabel}
+                </button>
+                {isTranscribing && (
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400" role="status">
+                    Transcribing audio...
+                  </p>
+                )}
+              </div>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                {tr.voiceInputBetaNote}
+              </p>
+              {!isDictationPreferredBrowser && browserKind !== "unknown" && (
+                <p className="text-sm text-amber-700 dark:text-amber-400" role="status">
+                  {tr.voiceInputSafariWarning}
+                </p>
+              )}
               <textarea
                 id="user-message"
                 value={message}
@@ -618,6 +910,30 @@ export default function Home() {
               >
                 {tr.yourAnswer}
               </label>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  className={btnSpeak}
+                  onClick={() =>
+                    isRecording && recordingTarget === "clarification"
+                      ? handleStopRecording()
+                      : handleStartRecording("clarification")
+                  }
+                  disabled={isTranscribing || !isDictationPreferredBrowser}
+                >
+                  {isRecording && recordingTarget === "clarification"
+                    ? tr.voiceInputBetaStopLabel
+                    : tr.voiceInputBetaLabel}
+                </button>
+              </div>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                {tr.voiceInputBetaNote}
+              </p>
+              {!isDictationPreferredBrowser && browserKind !== "unknown" && (
+                <p className="text-sm text-amber-700 dark:text-amber-400" role="status">
+                  {tr.voiceInputSafariWarning}
+                </p>
+              )}
               <textarea
                 id="clarify-text"
                 value={clarification}
@@ -693,6 +1009,15 @@ export default function Home() {
             role="alert"
           >
             {error}
+          </div>
+        )}
+        {notice && (
+          <div
+            className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900 shadow-sm dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-100"
+            role="status"
+            aria-live="polite"
+          >
+            {notice}
           </div>
         )}
       </div>

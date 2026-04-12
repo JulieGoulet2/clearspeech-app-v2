@@ -1,5 +1,6 @@
 import os
 import time
+from io import BytesIO
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -187,3 +188,41 @@ def confirmation_question_for_user(lang: str) -> str:
         "fr": "Est-ce que c’est ce que tu veux dire?",
     }
     return questions.get(lang, questions["en"])
+
+
+def transcribe_audio(audio_bytes: bytes, filename: str, language_hint: str | None = None) -> str:
+    if not audio_bytes:
+        raise ValueError("Audio file is empty")
+
+    print(
+        "[TRANSCRIBE] helper received file:",
+        filename,
+        "size_bytes:",
+        len(audio_bytes),
+        "language_hint:",
+        language_hint,
+    )
+
+    file_obj = BytesIO(audio_bytes)
+    file_obj.name = filename or "recording.webm"
+
+    options: dict = {
+        "model": "whisper-1",
+        "file": file_obj,
+    }
+    if language_hint in {"en", "fr", "de"}:
+        options["language"] = language_hint
+
+    t0 = time.perf_counter()
+    transcript = get_client().audio.transcriptions.create(**options)
+    elapsed = time.perf_counter() - t0
+    print(f"[TRANSCRIBE] timing_s: {elapsed:.2f}")
+
+    transcript_text = transcript.text if hasattr(transcript, "text") else str(transcript)
+    transcript_text = (transcript_text or "").strip()
+    print("[TRANSCRIBE] transcript_len:", len(transcript_text))
+
+    if not transcript_text:
+        raise RuntimeError("Speech was recorded, but no transcript was produced.")
+
+    return transcript_text

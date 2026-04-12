@@ -94,7 +94,7 @@ python -m pytest -v
 
 ## 🧪 Frontend tests
 
-The Next.js frontend has minimal UI and API-interaction tests using **Jest** + **React Testing Library**.
+The Next.js frontend has minimal but useful UI and API-interaction tests using **Jest** + **React Testing Library**.
 
 See: [`frontend/README.md`](frontend/README.md) (section: **Frontend Testing**)
 
@@ -104,6 +104,11 @@ Quick run:
 cd frontend
 npm test
 ```
+
+Current frontend tests include:
+
+- core page behavior (`__tests__/page.test.tsx`)
+- dictation frontend logic (`__tests__/dictation.test.tsx`) with mocked `/transcribe` responses and browser-aware UI checks
 
 ---
 

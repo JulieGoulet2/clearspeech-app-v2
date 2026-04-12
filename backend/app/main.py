@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.schemas import RewriteRequest, ClarifyRequest, RewriteResponse
@@ -61,4 +61,41 @@ async def clarify(request: ClarifyRequest):
             confirmation_question=confirmation_question,
         )
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/transcribe")
+async def transcribe(
+    audio: UploadFile = File(...),
+    language_hint: str = Form("en"),
+):
+    try:
+        print(
+            "[TRANSCRIBE] received:",
+            bool(audio),
+            "filename:",
+            audio.filename,
+            "content_type:",
+            audio.content_type,
+        )
+        audio_bytes = await audio.read()
+        print("[TRANSCRIBE] size_bytes:", len(audio_bytes))
+
+        transcript_text = logic.transcribe_audio(
+            audio_bytes=audio_bytes,
+            filename=audio.filename or "recording.webm",
+            language_hint=language_hint,
+        )
+
+        if not transcript_text or not transcript_text.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Speech was recorded, but no transcript was produced.",
+            )
+
+        return {"transcript": transcript_text}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("[TRANSCRIBE] error:", repr(e))
         raise HTTPException(status_code=500, detail=str(e))

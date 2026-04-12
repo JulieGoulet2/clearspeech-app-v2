@@ -28,14 +28,25 @@ Run tests:
 npm test
 ```
 
-Current tests are in `__tests__/page.test.tsx` and cover:
+Current tests are in:
+
+- `__tests__/page.test.tsx`
+- `__tests__/dictation.test.tsx`
+
+They cover:
 
 - page render (title, textarea, primary button)
 - textarea typing interaction
 - rewrite button triggering a mocked `fetch` call with the expected payload
 - displaying mocked API response text in the UI
+- dictation frontend flow with mocked `/transcribe` responses:
+  - successful transcript inserts text + shows success notice
+  - empty transcript shows an error
+  - API failure shows an error
+  - browser-aware dictation UI behavior (Safari enabled, Chrome warning/disabled)
 
 Tests mock `global.fetch` with `jest.fn()`, so no real backend calls are made.
+Dictation tests also mock browser APIs at a high level (user agent, `getUserMedia`, `MediaRecorder`) without testing real microphone/audio behavior.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
