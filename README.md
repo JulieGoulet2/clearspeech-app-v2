@@ -1,5 +1,14 @@
 # ClearSpeech (Next Version)
 
+## 🌐 Live URLs
+
+| | URL |
+|---|---|
+| **Frontend** | https://clearspeech-app-v2.vercel.app |
+| **Backend** | https://clearspeech-backend.onrender.com |
+
+> The backend is on Render free tier — the first request after inactivity may take ~1 minute to wake up.
+
 **Version:** `3.0.0` (defined in `backend/app/version.py`; align with `frontend/package.json` when you bump releases).
 
 **Hosting:** On **Render free** tiers, services can **sleep** when idle. The **first request after inactivity may be slow** while the app wakes up—that is **normal** on free hosting, not a bug.
