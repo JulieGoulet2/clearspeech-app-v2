@@ -1,4 +1,6 @@
 """HTTP API tests with mocked logic — no OpenAI calls."""
+import io
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -53,3 +55,48 @@ def test_post_clarify_returns_200_and_json_shape(monkeypatch):
     data = response.json()
     assert data["proposed_sentence"] == "Mock clarified rewrite."
     assert data["confirmation_question"] == "Mock confirm FR?"
+
+
+def test_post_transcribe_returns_transcript(monkeypatch):
+    monkeypatch.setattr(
+        "app.main.logic.transcribe_audio",
+        lambda audio_bytes, filename, language_hint: "Are you working?",
+    )
+
+    response = client.post(
+        "/transcribe",
+        files={"audio": ("recording.webm", io.BytesIO(b"fake-audio-data"), "audio/webm")},
+        data={"language_hint": "en"},
+    )
+    assert response.status_code == 200
+    assert response.json()["transcript"] == "Are you working?"
+
+
+def test_post_transcribe_empty_audio_returns_400(monkeypatch):
+    monkeypatch.setattr(
+        "app.main.logic.transcribe_audio",
+        lambda audio_bytes, filename, language_hint: "",
+    )
+
+    response = client.post(
+        "/transcribe",
+        files={"audio": ("recording.webm", io.BytesIO(b"fake-audio-data"), "audio/webm")},
+        data={"language_hint": "en"},
+    )
+    assert response.status_code == 400
+    assert "no transcript" in response.json()["detail"].lower()
+
+
+def test_post_transcribe_logic_error_returns_500(monkeypatch):
+    def raise_error(audio_bytes, filename, language_hint):
+        raise RuntimeError("OpenAI API failure")
+
+    monkeypatch.setattr("app.main.logic.transcribe_audio", raise_error)
+
+    response = client.post(
+        "/transcribe",
+        files={"audio": ("recording.webm", io.BytesIO(b"fake-audio-data"), "audio/webm")},
+        data={"language_hint": "en"},
+    )
+    assert response.status_code == 500
+    assert "OpenAI API failure" in response.json()["detail"]
