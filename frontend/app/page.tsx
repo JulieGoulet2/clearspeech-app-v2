@@ -728,7 +728,7 @@ export default function Home() {
                       ? handleStopRecording()
                       : handleStartRecording("message")
                   }
-                  disabled={isTranscribing || !isDictationPreferredBrowser}
+                  disabled={isTranscribing}
                 >
                   {isRecording && recordingTarget === "message"
                     ? tr.voiceInputBetaStopLabel
@@ -919,7 +919,7 @@ export default function Home() {
                       ? handleStopRecording()
                       : handleStartRecording("clarification")
                   }
-                  disabled={isTranscribing || !isDictationPreferredBrowser}
+                  disabled={isTranscribing}
                 >
                   {isRecording && recordingTarget === "clarification"
                     ? tr.voiceInputBetaStopLabel
