@@ -110,7 +110,7 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
     firstRequestNote: "The first request may be slower after inactivity.",
     voiceInputBetaLabel: "🎤 Voice input (Beta)",
     voiceInputBetaStopLabel: "🔴 Stop voice input (Beta)",
-    voiceInputBetaNote: "Tap the button, wait 1–2 seconds, then speak. Voice input is a beta feature and may require retry.",
+    voiceInputBetaNote: "Tap the button, wait about 10 seconds, then speak. Voice input is a beta feature and may require retry.",
     voiceInputSafariWarning:
       "Voice dictation works best in Safari or Chrome. Please use typing in this browser.",
     voiceInputSafariOnlyNote: "⚠️ Voice dictation is available in Safari and Chrome.",
@@ -176,7 +176,7 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
     voiceInputBetaLabel: "🎤 Saisie vocale (Bêta)",
     voiceInputBetaStopLabel: "🔴 Arrêter la saisie vocale (Bêta)",
     voiceInputBetaNote:
-      "Appuie sur le bouton, attends 1–2 secondes, puis parle. La saisie vocale est une fonction bêta et peut nécessiter un nouvel essai.",
+      "Appuie sur le bouton, attends environ 10 secondes, puis parle. La saisie vocale est une fonction bêta et peut nécessiter un nouvel essai.",
     voiceInputSafariWarning:
       "La dictée vocale fonctionne mieux dans Safari ou Chrome. Veuillez utiliser le clavier dans ce navigateur.",
     voiceInputSafariOnlyNote: "⚠️ La dictée vocale est disponible dans Safari et Chrome.",
@@ -243,7 +243,7 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
     voiceInputBetaLabel: "🎤 Spracheingabe (Beta)",
     voiceInputBetaStopLabel: "🔴 Spracheingabe stoppen (Beta)",
     voiceInputBetaNote:
-      "Tippe auf den Knopf, warte 1–2 Sekunden, dann sprich. Die Spracheingabe ist eine Beta-Funktion und kann einen erneuten Versuch erfordern.",
+      "Tippe auf den Knopf, warte etwa 10 Sekunden, dann sprich. Die Spracheingabe ist eine Beta-Funktion und kann einen erneuten Versuch erfordern.",
     voiceInputSafariWarning:
       "Die Spracheingabe funktioniert am besten in Safari oder Chrome. Bitte verwenden Sie in diesem Browser die Tastatureingabe.",
     voiceInputSafariOnlyNote: "⚠️ Die Spracheingabe ist in Safari und Chrome verfügbar.",

@@ -258,15 +258,16 @@ export default function Home() {
     }
     try {
       const activeTarget = target;
-      // Prefer the real built-in microphone over virtual audio devices
-      // (e.g. "Microsoft Teams Audio Device (Virtual)", Zoom, etc.)
-      // that Chrome may select as the system default.
+      // Try to skip virtual audio devices (Teams, Zoom, etc.) that Chrome may
+      // select as the system default. Only filter when labels are available
+      // (i.e. permission was already granted); otherwise fall back to default.
       const devices = await navigator.mediaDevices.enumerateDevices();
       const audioInputs = devices.filter((d) => d.kind === "audioinput");
+      const hasLabels = audioInputs.some((d) => d.label);
       const VIRTUAL_KEYWORDS = ["virtual", "teams", "zoom", "aggregate", "blackhole", "soundflower", "loopback"];
-      const realMic = audioInputs.find(
-        (d) => !VIRTUAL_KEYWORDS.some((kw) => d.label.toLowerCase().includes(kw)),
-      );
+      const realMic = hasLabels
+        ? audioInputs.find((d) => !VIRTUAL_KEYWORDS.some((kw) => d.label.toLowerCase().includes(kw)))
+        : null;
       const audioConstraints: MediaTrackConstraints = {
         echoCancellation: true,
         noiseSuppression: false,
