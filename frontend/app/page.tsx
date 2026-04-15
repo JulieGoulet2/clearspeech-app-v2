@@ -93,7 +93,9 @@ function getUserFriendlyRequestError(err: unknown, fallback: string): string {
     normalized.includes("networkerror") ||
     normalized.includes("network request failed");
 
-  return isLikelyWakeUpOrNetworkIssue ? SERVER_WAKE_UP_MESSAGE : message || fallback;
+  if (isLikelyWakeUpOrNetworkIssue) return SERVER_WAKE_UP_MESSAGE;
+  // Show the raw message if it looks like a 4xx/5xx detail from the backend
+  return message || fallback;
 }
 
 function speak(text: string, language: string) {
@@ -589,6 +591,13 @@ export default function Home() {
             Version {packageJson.version}
           </p>
         </header>
+
+        <div
+          className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed text-amber-900 shadow-sm dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-100"
+          role="note"
+        >
+          <p>{tr.testingNote}</p>
+        </div>
 
         {!API_BASE_URL && (
           <div

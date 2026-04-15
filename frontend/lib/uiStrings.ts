@@ -54,6 +54,7 @@ export type UiStrings = {
   helpVoiceTitle: string;
   helpVoiceReadAloud: string;
   helpVoiceDictation: string;
+  testingNote: string;
 };
 
 export const UI_STRINGS: Record<Lang, UiStrings> = {
@@ -118,6 +119,8 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
     helpVoiceReadAloud: "Any text in the app can be read aloud using the 🔊 Read aloud buttons.",
     helpVoiceDictation:
       "You can dictate your message using the 🎤 Voice input button instead of typing.",
+    testingNote:
+      "There is a limit of about 15 complete conversations per day during the testing period. For more access, contact drjuliegoulet@gmail.com",
   },
   fr: {
     title: "ClearSpeech",
@@ -185,6 +188,8 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
       "Tous les textes de l'application peuvent être lus à voix haute grâce aux boutons 🔊 Lire à voix haute.",
     helpVoiceDictation:
       "Tu peux dicter ton message avec le bouton 🎤 Saisie vocale au lieu de taper.",
+    testingNote:
+      "Il y a une limite d'environ 15 conversations complètes par jour pendant la période de test. Pour plus d'accès, contacte drjuliegoulet@gmail.com",
   },
   de: {
     title: "ClearSpeech",
@@ -252,6 +257,8 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
       "Alle Texte in der App können mit den Schaltflächen 🔊 Vorlesen laut vorgelesen werden.",
     helpVoiceDictation:
       "Du kannst deine Nachricht mit dem Knopf 🎤 Spracheingabe diktieren, anstatt zu tippen.",
+    testingNote:
+      "Während der Testphase gibt es ein Limit von etwa 15 vollständigen Gesprächen pro Tag. Für mehr Zugang, kontaktiere drjuliegoulet@gmail.com",
   },
 };
 
