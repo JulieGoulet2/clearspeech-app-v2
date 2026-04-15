@@ -28,6 +28,7 @@ export type UiStrings = {
   errorUnknown: string;
   errorCopy: string;
   errorRequest: string;
+  errorAdminToken: string;
   helpTitle: string;
   helpWhatTitle: string;
   helpWhatBody: string;
@@ -86,6 +87,7 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
     errorUnknown: "Unknown error",
     errorCopy: "Copy failed.",
     errorRequest: "Request failed",
+    errorAdminToken: "Daily limit reached even with admin token — the token may be incorrect. Check NEXT_PUBLIC_ADMIN_TOKEN and ADMIN_TOKEN in your environment settings.",
     helpTitle: "ℹ️ Help — how this app works",
     helpWhatTitle: "What this app does",
     helpWhatBody:
@@ -150,6 +152,7 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
     errorUnknown: "Erreur inconnue",
     errorCopy: "La copie a échoué.",
     errorRequest: "La requête a échoué",
+    errorAdminToken: "Limite journalière atteinte malgré le token administrateur — le token est peut-être incorrect. Vérifie NEXT_PUBLIC_ADMIN_TOKEN et ADMIN_TOKEN dans tes paramètres d'environnement.",
     helpTitle: "ℹ️ Aide — comment utiliser l’application",
     helpWhatTitle: "Ce que fait l’application",
     helpWhatBody:
@@ -219,6 +222,7 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
     errorUnknown: "Unbekannter Fehler",
     errorCopy: "Kopieren fehlgeschlagen.",
     errorRequest: "Anfrage fehlgeschlagen",
+    errorAdminToken: "Tageslimit trotz Admin-Token erreicht — das Token ist möglicherweise falsch. Prüfe NEXT_PUBLIC_ADMIN_TOKEN und ADMIN_TOKEN in deinen Umgebungseinstellungen.",
     helpTitle: "ℹ️ Hilfe — so funktioniert die App",
     helpWhatTitle: "Was die App macht",
     helpWhatBody:

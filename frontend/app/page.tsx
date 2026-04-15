@@ -82,6 +82,30 @@ const MIN_RECORDING_DURATION_MS = 900;
 const MIN_AUDIO_BLOB_BYTES = 120;
 const RECORDER_TIMESLICE_MS = 250;
 
+async function parseApiError(
+  response: Response,
+  adminTokenSet: boolean,
+  errorAdminToken: string,
+  fallback: string
+): Promise<string> {
+  let detail = fallback;
+  try {
+    const text = await response.text();
+    try {
+      const parsed = JSON.parse(text);
+      detail = typeof parsed.detail === "string" ? parsed.detail : text || fallback;
+    } catch {
+      detail = text || fallback;
+    }
+  } catch {
+    // keep fallback
+  }
+  if (response.status === 429 && adminTokenSet) {
+    return errorAdminToken;
+  }
+  return detail;
+}
+
 function getUserFriendlyRequestError(err: unknown, fallback: string): string {
   if (!(err instanceof Error)) return fallback;
 
@@ -373,8 +397,8 @@ export default function Home() {
             body: formData,
           });
           if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText || tr.errorRequest);
+            const msg = await parseApiError(response, !!ADMIN_TOKEN, tr.errorAdminToken, tr.errorRequest);
+            throw new Error(msg);
           }
           const data: { transcript?: string; text?: string } = await response.json();
           console.info("[STT] Returned JSON:", data);
@@ -458,8 +482,8 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || tr.errorRequest);
+        const msg = await parseApiError(response, !!ADMIN_TOKEN, tr.errorAdminToken, tr.errorRequest);
+        throw new Error(msg);
       }
 
       const data: RewriteResponse = await response.json();
@@ -505,8 +529,8 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || tr.errorRequest);
+        const msg = await parseApiError(response, !!ADMIN_TOKEN, tr.errorAdminToken, tr.errorRequest);
+        throw new Error(msg);
       }
 
       const data: RewriteResponse = await response.json();
