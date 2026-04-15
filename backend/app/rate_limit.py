@@ -4,10 +4,13 @@ Simple in-memory rate limiter.
 - 50 requests per IP per 24 hours for regular users.
 - Requests with a valid X-Admin-Token header are unlimited.
 """
+from __future__ import annotations
+
 import os
 import time
 from collections import defaultdict
 from threading import Lock
+from typing import Optional
 
 from fastapi import Header, HTTPException, Request
 
@@ -27,7 +30,7 @@ def _get_ip(request: Request) -> str:
 
 def check_rate_limit(
     request: Request,
-    x_admin_token: str | None = Header(default=None),
+    x_admin_token: Optional[str] = Header(default=None),
 ) -> None:
     """FastAPI dependency — raises 429 when the daily limit is reached."""
     admin_token = os.environ.get("ADMIN_TOKEN", "").strip()

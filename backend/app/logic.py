@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import os
 import time
 from io import BytesIO
+from typing import Optional
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -190,7 +193,7 @@ def confirmation_question_for_user(lang: str) -> str:
     return questions.get(lang, questions["en"])
 
 
-def transcribe_audio(audio_bytes: bytes, filename: str, language_hint: str | None = None) -> str:
+def transcribe_audio(audio_bytes: bytes, filename: str, language_hint: Optional[str] = None) -> str:
     if not audio_bytes:
         raise ValueError("Audio file is empty")
 
