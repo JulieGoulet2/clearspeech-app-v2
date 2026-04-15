@@ -1,6 +1,7 @@
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.rate_limit import check_rate_limit
 from app.schemas import RewriteRequest, ClarifyRequest, RewriteResponse
 from app import logic
 
@@ -29,7 +30,7 @@ async def health():
     return {"status": "ok"}
 
 
-@app.post("/rewrite", response_model=RewriteResponse)
+@app.post("/rewrite", response_model=RewriteResponse, dependencies=[Depends(check_rate_limit)])
 async def rewrite(request: RewriteRequest):
     try:
         proposed_sentence, confirmation_question = logic.propose_rewrite_and_question(
@@ -45,7 +46,7 @@ async def rewrite(request: RewriteRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/clarify", response_model=RewriteResponse)
+@app.post("/clarify", response_model=RewriteResponse, dependencies=[Depends(check_rate_limit)])
 async def clarify(request: ClarifyRequest):
     try:
         proposed_sentence, confirmation_question = (
@@ -64,7 +65,7 @@ async def clarify(request: ClarifyRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/transcribe")
+@app.post("/transcribe", dependencies=[Depends(check_rate_limit)])
 async def transcribe(
     audio: UploadFile = File(...),
     language_hint: str = Form("en"),

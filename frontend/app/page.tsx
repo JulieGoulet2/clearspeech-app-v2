@@ -66,6 +66,11 @@ const btnSpeak =
 
 /** Base URL for the backend API (no trailing slash). Null if NEXT_PUBLIC_API_URL is unset. */
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const ADMIN_TOKEN = process.env.NEXT_PUBLIC_ADMIN_TOKEN ?? "";
+
+function apiHeaders(): HeadersInit {
+  return ADMIN_TOKEN ? { "X-Admin-Token": ADMIN_TOKEN } : {};
+}
 if (!API_BASE_URL) {
   throw new Error("Missing NEXT_PUBLIC_API_URL environment variable");
 }
@@ -362,6 +367,7 @@ export default function Home() {
           });
           const response = await fetch(`${API_BASE_URL}/transcribe`, {
             method: "POST",
+            headers: apiHeaders(),
             body: formData,
           });
           if (!response.ok) {
@@ -441,6 +447,7 @@ export default function Home() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...apiHeaders(),
         },
         body: JSON.stringify({
           message,
@@ -486,6 +493,7 @@ export default function Home() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...apiHeaders(),
         },
         body: JSON.stringify({
           original_message: message,
