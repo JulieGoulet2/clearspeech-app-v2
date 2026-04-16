@@ -39,3 +39,7 @@ build/
 # Temporary files
 *.tmp
 *.swp
+
+# Claude Code settings (keep local only)
+CLAUDE.md
+.claude/
