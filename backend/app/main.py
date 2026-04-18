@@ -1,3 +1,14 @@
+"""
+main.py — FastAPI application for ClearSpeech.
+
+Exposes three endpoints:
+  POST /rewrite    — first step: rewrite the user's message
+  POST /clarify    — second step: update the suggestion after clarification
+  POST /transcribe — convert a recorded audio file to text (voice input)
+
+All POST endpoints are rate-limited (50 requests per IP per 24 hours).
+Requests with a valid X-Admin-Token header bypass the limit.
+"""
 from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 

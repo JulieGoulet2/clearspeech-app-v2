@@ -1,3 +1,20 @@
+/**
+ * page.tsx — Main page of the ClearSpeech application.
+ *
+ * This is a single-page React component that guides the user through
+ * a short conversation:
+ *   1. Compose — user writes (or dictates) a short message
+ *   2. Confirm — app proposes a clearer version and asks "Is this what you mean?"
+ *   3. Clarify — if the user says No, they can add one short clarification
+ *   4. Final   — the final sentence is shown and can be copied
+ *
+ * Voice input uses the browser's MediaRecorder API. The audio is sent to
+ * the backend /transcribe endpoint (OpenAI Whisper) and the transcript is
+ * inserted into the text field.
+ *
+ * All user-facing text is in uiStrings.ts so the interface works in
+ * English, French, and German.
+ */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -82,6 +99,10 @@ const MIN_RECORDING_DURATION_MS = 900;
 const MIN_AUDIO_BLOB_BYTES = 120;
 const RECORDER_TIMESLICE_MS = 250;
 
+// ---------------------------------------------------------------------------
+// API helpers
+// ---------------------------------------------------------------------------
+
 async function parseApiError(
   response: Response,
   adminTokenSet: boolean,
@@ -121,6 +142,10 @@ function getUserFriendlyRequestError(err: unknown, fallback: string): string {
   // Show the raw message if it looks like a 4xx/5xx detail from the backend
   return message || fallback;
 }
+
+// ---------------------------------------------------------------------------
+// Text-to-speech helper
+// ---------------------------------------------------------------------------
 
 function speak(text: string, language: string) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -182,6 +207,10 @@ function speak(text: string, language: string) {
     speakWithVoices(synthesis.getVoices());
   }, 250);
 }
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
 
 export default function Home() {
   const [language, setLanguage] = useState<Lang>("en");

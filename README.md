@@ -1,154 +1,156 @@
-# ClearSpeech (Next Version)
+# ClearSpeech
 
-## 🌐 Live URLs
+**AI communication assistant for people who find writing or finding the right words difficult.**
+
+ClearSpeech is designed for people with aphasia, cognitive difficulties, or language barriers. You write a few words — even incomplete or misspelled — and the app turns them into a clear sentence you can use in real life.
+
+---
+
+## Live app
 
 | | URL |
 |---|---|
 | **Frontend** | https://clearspeech-app-v2.vercel.app |
-| **Backend** | https://clearspeech-backend.onrender.com |
+| **Backend API** | https://clearspeech-backend.onrender.com |
 
-> The backend is on Render free tier — the first request after inactivity may take ~1 minute to wake up.
+> The backend runs on Render free tier. The first request after a period of inactivity may take about one minute while the server wakes up. This is normal.
 
-**Version:** `3.0.0` (defined in `backend/app/version.py`; align with `frontend/package.json` when you bump releases).
-
-**Hosting:** On **Render free** tiers, services can **sleep** when idle. The **first request after inactivity may be slow** while the app wakes up—that is **normal** on free hosting, not a bug.
+**Current version:** `3.0.0`
 
 ---
 
-ClearSpeech is an AI communication assistant designed for people with communication difficulties (e.g. aphasia, non-native speakers, cognitive load).
+## How it works
 
-This reposiotory contains the **next version of the application**, moving from a Streamlit prototype to a full web application.
+1. You write a short message — a few words is enough, spelling does not need to be perfect
+2. The app proposes a clearer sentence and asks: "Is this what you mean?"
+3. You answer Yes or No
+4. If No, you add one short clarification — the app updates the suggestion
+5. When you are happy, you see the final text and can copy it
 
----
+**Languages supported:** English, French, German
 
-## 💡 Project goal
+**Voice input (beta):** You can dictate your message instead of typing. The audio is transcribed by OpenAI Whisper.
 
-The goal of ClearSpeech is to help users express their intended meaning clearly with minimal effort.
-
-The system:
-- accepts short or incomplete input
-- proposes a clear sentence
-- asks a simple confirmation
-- iterates only if needed
-- produces a final message ready to copy and use
+**Read aloud:** Any text in the app can be read aloud using the browser's text-to-speech.
 
 ---
 
-## 🚀 Current status
+## Architecture
 
-This repository is under active development.
+```
+frontend/   Next.js 14 (TypeScript) — deployed on Vercel
+backend/    FastAPI (Python)        — deployed on Render
+```
 
-It represents the transition from:
-- prototype (Streamlit app)
-➡️ to
-- structured web application (frontend + backend)
-
----
-
-## 🔗 Existing working prototype
-
-A working version is already available here:
-
-👉 https://clearspeech-app-udbwmkg8k65nd6nahbvjip.streamlit.app
+The frontend calls the backend API. The backend calls the OpenAI API (GPT-4.1-mini for text, Whisper-1 for audio).
 
 ---
 
-## 🧱 Architecture
+## Project structure
 
-The application is being rebuilt with:
-
-- **Frontend:** Web app (React / Next.js)
-- **Backend:** FastAPI (Python)
-- **AI:** OpenAI API
-- **Logic:** Custom communication assistant logic
-
----
-
-## 📁 Project structure
+```
 backend/
-app/
-main.py
-logic.py
-schemas.py
+  app/
+    main.py         API endpoints (FastAPI)
+    logic.py        AI logic — calls to OpenAI
+    schemas.py      Request and response models
+    rate_limit.py   Rate limiting (50 requests/IP/day)
+    version.py      Version number
+  tests/
+    test_api.py           API endpoint tests
+    test_logic_helpers.py Logic helper tests
+    test_logic_model.py   AI logic tests (mocked)
+    test_rate_limit.py    Rate limit tests
 
 frontend/
+  app/
+    page.tsx        Main page component
+    layout.tsx      App layout
+  lib/
+    uiStrings.ts    All user-facing text (EN / FR / DE)
+    audioUtils.ts   Audio conversion utility (WAV encoding)
+  __tests__/
+    page.test.tsx       Core page behavior tests
+    dictation.test.tsx  Voice input tests
+```
+
 ---
 
-## 🧪 Backend tests
+## Running locally
 
-The API and core logic are covered by **pytest** tests under `backend/tests/`. They **do not call the OpenAI API** (the model and route handlers are mocked), so you can run them without an API key.
-
-**Install dependencies** (once per environment):
+### Backend
 
 ```bash
 cd backend
 pip install -r requirements.txt
 ```
 
-**Run tests** from the `backend/` folder:
+Create a `.env` file in `backend/`:
+```
+OPENAI_API_KEY=your-key-here
+ADMIN_TOKEN=a-secret-token-for-unlimited-testing
+```
+
+Start the server:
+```bash
+uvicorn app.main:app --reload
+```
+
+### Frontend
 
 ```bash
+cd frontend
+npm install
+```
+
+Create a `.env.local` file in `frontend/`:
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_ADMIN_TOKEN=a-secret-token-for-unlimited-testing
+```
+
+Start the dev server:
+```bash
+npm run dev
+```
+
+---
+
+## Running tests
+
+### Backend tests
+
+Tests do not call the OpenAI API — all AI calls are mocked.
+
+```bash
+cd backend
 python -m pytest -v
 ```
 
 | File | What it covers |
 |------|----------------|
-| `tests/test_logic_helpers.py` | `confirmation_question_for_user` / `clarification_question_for_user` for `en`, `fr`, `de` |
-| `tests/test_logic_model.py` | `propose_rewrite_and_question` and `propose_rewrite_after_clarification` with a patched `_call_model` |
-| `tests/test_api.py` | `POST /rewrite` and `POST /clarify` via FastAPI `TestClient` with mocked logic |
+| `test_api.py` | `/rewrite`, `/clarify`, `/transcribe` endpoints |
+| `test_logic_helpers.py` | Confirmation and clarification question strings (EN/FR/DE) |
+| `test_logic_model.py` | AI rewrite logic with mocked model output |
+| `test_rate_limit.py` | 50 req/day limit, admin bypass, 24h reset, multi-user isolation |
 
-`tests/conftest.py` adjusts the import path so `import app` works when pytest runs from `backend/`.
-
----
-
-## 🧪 Frontend tests
-
-The Next.js frontend has minimal but useful UI and API-interaction tests using **Jest** + **React Testing Library**.
-
-See: [`frontend/README.md`](frontend/README.md) (section: **Frontend Testing**)
-
-Quick run:
+### Frontend tests
 
 ```bash
 cd frontend
 npm test
 ```
 
-Current frontend tests include:
+---
 
-- core page behavior (`__tests__/page.test.tsx`)
-- dictation frontend logic (`__tests__/dictation.test.tsx`) with mocked `/transcribe` responses and browser-aware UI checks
+## Rate limiting
+
+Normal users are limited to **50 requests per IP per 24 hours** (about 15 complete conversations).
+
+If you want unlimited access for testing, set `ADMIN_TOKEN` in the backend environment and send the same value in the `X-Admin-Token` request header (or set `NEXT_PUBLIC_ADMIN_TOKEN` in the frontend environment).
 
 ---
 
-## 🧠 Key design principles
+## Author
 
-- low cognitive load
-- simple interaction (yes / no)
-- multilingual (EN / FR / DE)
-- robust handling of unclear input
-- accessibility-first design
-
----
-
-## 🔮 Roadmap
-
-- backend API (FastAPI)
-- frontend interface
-- user testing
-- voice input (later stage)
-- text-to-speech (accessibility)
-
----
-
-## ⚠️ Note
-
-This version is under construction.
-
-For a stable experience, use the Streamlit version.
-
----
-
-## 👤 Author
-
-Julie Goulet drjuliegoulet@gmail.com
+Dr. Julie Goulet — drjuliegoulet@gmail.com

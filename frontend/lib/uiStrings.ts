@@ -1,3 +1,12 @@
+/**
+ * uiStrings.ts — All user-facing text for the ClearSpeech interface.
+ *
+ * Every string shown to the user lives here, in English, French, and German.
+ * To add a new language: add a new key to the Lang type and a new entry in
+ * UI_STRINGS following the same structure as the existing languages.
+ *
+ * Usage: import { t } from "../lib/uiStrings" then call t(lang).someKey
+ */
 export type Lang = "en" | "fr" | "de";
 
 export type UiStrings = {

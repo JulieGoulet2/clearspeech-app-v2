@@ -1,3 +1,16 @@
+"""
+logic.py — Core AI logic for ClearSpeech.
+
+This module handles all calls to the OpenAI API:
+  - Text rewriting: takes a short or unclear user message and returns a
+    clearer sentence plus a confirmation question.
+  - Clarification: updates the suggestion when the user says "No" and
+    provides a short clarification.
+  - Audio transcription: converts a recorded audio file to text using Whisper.
+
+The OpenAI client is created once and reused (singleton pattern) to avoid
+creating a new connection on every request.
+"""
 from __future__ import annotations
 
 import os
@@ -99,7 +112,11 @@ Output format:
 
 
 def _call_model(user_input: str) -> str:
-    """Call the model and return raw text."""
+    """Call GPT-4.1-mini and return the raw text response.
+
+    Temperature is set very low (0.1) so the output is consistent and
+    predictable — this is not a creative task.
+    """
     t0 = time.perf_counter()
     response = get_client().responses.create(
         model="gpt-4.1-mini",
@@ -113,9 +130,14 @@ def _call_model(user_input: str) -> str:
 
 
 def propose_rewrite_and_question(text: str, lang: str) -> tuple[str, str]:
-    """
-    First step:
-    return (proposed_sentence, confirmation_question)
+    """First step of the conversation.
+
+    Takes the user's raw message and returns:
+      - a clearer rewritten sentence
+      - a confirmation question ("Is this what you mean?")
+
+    The model is expected to return exactly two lines. If it returns only
+    one line, a standard confirmation question is added as fallback.
     """
     raw = _call_model(
         f"""Language hint: {lang}
@@ -139,9 +161,10 @@ User input:
 def propose_rewrite_after_clarification(
     original_text: str, clarification: str, lang: str
 ) -> tuple[str, str]:
-    """
-    Second step after user clarification:
-    return (proposed_sentence, confirmation_question)
+    """Second step — called when the user answered "No" and added a clarification.
+
+    Combines the original message and the clarification to produce an
+    updated suggestion. Returns the same format as propose_rewrite_and_question.
     """
     prompt = f"""Language hint: {lang}
 

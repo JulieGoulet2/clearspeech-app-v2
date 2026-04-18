@@ -1,3 +1,9 @@
+"""
+schemas.py — Request and response models for the ClearSpeech API.
+
+Pydantic validates the incoming JSON automatically, so invalid requests
+(missing fields, wrong types) are rejected before they reach the logic layer.
+"""
 from pydantic import BaseModel, Field
 
 
