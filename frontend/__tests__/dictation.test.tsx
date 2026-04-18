@@ -1,3 +1,11 @@
+/**
+ * dictation.test.tsx — Voice input tests for the ClearSpeech main page.
+ *
+ * Tests the full voice dictation flow: microphone access, MediaRecorder,
+ * sending audio to the /transcribe endpoint, and inserting the transcript
+ * into the message or clarification field. All browser APIs and fetch
+ * calls are mocked so no microphone or backend is needed to run these tests.
+ */
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Home from "../app/page";

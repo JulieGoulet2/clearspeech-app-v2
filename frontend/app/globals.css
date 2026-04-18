@@ -1,3 +1,10 @@
+/*
+ * globals.css — Global styles for ClearSpeech.
+ *
+ * Imports Tailwind CSS and defines CSS variables for light and dark mode
+ * (background and foreground colours). All other styling is done with
+ * Tailwind utility classes directly in the components.
+ */
 @import "tailwindcss";
 
 :root {

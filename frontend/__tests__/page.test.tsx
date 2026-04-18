@@ -1,3 +1,10 @@
+/**
+ * page.test.tsx — Core UI tests for the ClearSpeech main page.
+ *
+ * Tests the basic page flow: rendering, language switching, the rewrite
+ * request, and the yes/no confirmation step. All API calls are mocked
+ * so no backend or OpenAI key is needed to run these tests.
+ */
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Home from "../app/page";
