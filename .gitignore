@@ -22,6 +22,7 @@ backend/.env
 # IDE
 .vscode/
 .idea/
+.cursor/
 
 # Streamlit (if reused somewhere)
 .streamlit/

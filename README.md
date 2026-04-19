@@ -119,6 +119,8 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 NEXT_PUBLIC_ADMIN_TOKEN=a-secret-token-for-unlimited-testing
 ```
 
+> **Warning:** `NEXT_PUBLIC_ADMIN_TOKEN` is for local development only. Never set it in a production environment (Vercel, etc.) — `NEXT_PUBLIC_` variables are embedded in the JavaScript bundle and visible to anyone who inspects the page.
+
 Start the dev server:
 ```bash
 npm run dev
@@ -157,7 +159,7 @@ npm test
 
 Normal users are limited to **50 requests per IP per 24 hours** (about 15 complete conversations).
 
-If you want unlimited access for testing, set `ADMIN_TOKEN` in the backend environment and send the same value in the `X-Admin-Token` request header (or set `NEXT_PUBLIC_ADMIN_TOKEN` in the frontend environment).
+If you want unlimited access for local testing, set `ADMIN_TOKEN` in the backend `.env` and `NEXT_PUBLIC_ADMIN_TOKEN` to the same value in the frontend `.env.local`. Do not set `NEXT_PUBLIC_ADMIN_TOKEN` in production — it is visible in the JavaScript bundle.
 
 ---
 
