@@ -1,8 +1,10 @@
 # ClearSpeech
 
-**AI communication assistant for people who find writing or finding the right words difficult.**
+**AI communication assistant for people who struggle to find the right words.**
 
-ClearSpeech is designed for people with aphasia, cognitive difficulties, or language barriers. You write a few words — even incomplete or misspelled — and the app turns them into a clear sentence you can use in real life.
+I built ClearSpeech because I need it myself. I have aphasia — a neurological condition that makes writing difficult. Every day, I struggle to compose emails, messages, and even short texts. ClearSpeech takes my broken, incomplete input and turns it into a clear sentence I can actually use.
+
+Over 2 million people in Europe alone live with aphasia. Millions more have cognitive difficulties or language barriers that make written communication a daily challenge. Most AI tools assume you can write a perfect prompt. ClearSpeech assumes you can't — and that's the point.
 
 ---
 
@@ -16,6 +18,14 @@ ClearSpeech is designed for people with aphasia, cognitive difficulties, or lang
 > The backend runs on Render free tier. The first request after a period of inactivity may take about one minute while the server wakes up. This is normal.
 
 **Current version:** `3.0.0`
+
+---
+
+## What it looks like
+
+![ClearSpeech in action](application.png)
+
+*The user typed "I just want not go to you. Today" — the app suggested "I just do not want to go to you today." and asks for confirmation.*
 
 ---
 
@@ -153,4 +163,15 @@ If you want unlimited access for testing, set `ADMIN_TOKEN` in the backend envir
 
 ## Author
 
-Dr. Julie Goulet — drjuliegoulet@gmail.com
+**Dr. Julie Goulet** — researcher, developer, and person with aphasia.
+
+PhD in theoretical biophysics (computational neuroscience). Based in Munich, Germany. Building AI tools for people with disabilities.
+
+- LinkedIn: [Julie Goulet](https://www.linkedin.com/in/juliegoulet/)
+- Email: drjuliegoulet@gmail.com
+
+---
+
+## License
+
+MIT
