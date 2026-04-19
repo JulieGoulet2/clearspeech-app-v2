@@ -169,7 +169,7 @@ If you want unlimited access for local testing, set `ADMIN_TOKEN` in the backend
 
 PhD in theoretical biophysics (computational neuroscience). Based in Munich, Germany. Building AI tools for people with disabilities.
 
-- LinkedIn: [Julie Goulet](https://www.linkedin.com/in/juliegoulet/)
+- LinkedIn: [Julie Goulet](https://www.linkedin.com/in/julie-goulet-phd/)
 - Email: drjuliegoulet@gmail.com
 
 ---
