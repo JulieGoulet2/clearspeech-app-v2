@@ -48,11 +48,58 @@ Over 2 million people in Europe alone live with aphasia. Millions more have cogn
 ## Architecture
 
 ```
-frontend/   Next.js 14 (TypeScript) — deployed on Vercel
-backend/    FastAPI (Python)        — deployed on Render
+frontend/    Next.js 14 (TypeScript) — deployed on Vercel
+backend/     FastAPI (Python)        — deployed on Render
+mcp-server/  MCP server (Python)     — runs locally inside Claude Code
 ```
 
-The frontend calls the backend API. The backend calls the OpenAI API (GPT-4.1-mini for text, Whisper-1 for audio).
+The frontend calls the backend API. The backend calls the OpenAI API (GPT-4.1-mini for text, Whisper-1 for audio). The MCP server wraps the same backend API so Claude can call ClearSpeech tools directly inside any conversation.
+
+---
+
+## MCP Server — Claude Code integration
+
+The `mcp-server/` folder contains a lightweight [Model Context Protocol](https://modelcontextprotocol.io) server. It lets Claude use ClearSpeech tools directly inside Claude Code — no need to open the web app.
+
+**Tools exposed:**
+
+| Tool | What it does |
+|---|---|
+| `clearspeech_rewrite` | Rewrites a broken message into a clear sentence |
+| `clearspeech_clarify` | Updates the rewrite based on a correction |
+| `clearspeech_transcribe` | Transcribes audio (base64) using Whisper |
+
+**Install:**
+
+```bash
+cd mcp-server
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+```
+
+**Configure Claude Code** — add to `.claude/settings.json` in this repo (use absolute paths):
+
+```json
+{
+  "mcpServers": {
+    "clearspeech": {
+      "command": "/absolute/path/to/mcp-server/.venv/bin/python",
+      "args": ["/absolute/path/to/mcp-server/server.py"],
+      "env": {
+        "CLEARSPEECH_API_URL": "https://clearspeech-backend.onrender.com"
+      }
+    }
+  }
+}
+```
+
+**Test:**
+
+```bash
+cd mcp-server
+python -m pytest tests/ -v   # 15 tests, all pass
+```
 
 ---
 
@@ -82,6 +129,16 @@ frontend/
   __tests__/
     page.test.tsx       Core page behavior tests
     dictation.test.tsx  Voice input tests
+
+mcp-server/
+  server.py         MCP server — all tools in one file
+  pyproject.toml    Dependencies and entry point
+  .env.example      Environment variable template
+  tests/
+    conftest.py         Shared fixtures (mock backend, no real network)
+    test_rewrite.py     clearspeech_rewrite tool tests
+    test_clarify.py     clearspeech_clarify tool tests
+    test_transcribe.py  clearspeech_transcribe tool tests
 ```
 
 ---
