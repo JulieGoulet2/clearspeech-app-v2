@@ -78,7 +78,7 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
-**Configure Claude Code** — add to `.claude/settings.json` in this repo (use absolute paths):
+**Configure your MCP client** — example for Claude Code, add to `.claude/settings.json` (use absolute paths):
 
 ```json
 {
