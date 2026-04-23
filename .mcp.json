@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "clearspeech": {
+      "command": "/Users/juliegoulet/Documents/ClearSpeach/clearspeech-app-v2/mcp-server/.venv/bin/python",
+      "args": [
+        "/Users/juliegoulet/Documents/ClearSpeach/clearspeech-app-v2/mcp-server/server.py"
+      ],
+      "env": {
+        "CLEARSPEECH_API_URL": "https://clearspeech-backend.onrender.com"
+      }
+    }
+  }
+}
