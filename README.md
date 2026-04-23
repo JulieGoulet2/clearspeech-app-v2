@@ -50,16 +50,16 @@ Over 2 million people in Europe alone live with aphasia. Millions more have cogn
 ```
 frontend/    Next.js 14 (TypeScript) — deployed on Vercel
 backend/     FastAPI (Python)        — deployed on Render
-mcp-server/  MCP server (Python)     — runs locally inside Claude Code
+mcp-server/  MCP server (Python)     — runs locally, works with any MCP-compatible client
 ```
 
-The frontend calls the backend API. The backend calls the OpenAI API (GPT-4.1-mini for text, Whisper-1 for audio). The MCP server wraps the same backend API so Claude can call ClearSpeech tools directly inside any conversation.
+The frontend calls the backend API. The backend calls the OpenAI API (GPT-4.1-mini for text, Whisper-1 for audio). The MCP server wraps the same backend API so any MCP-compatible client (Claude Code, Claude Desktop, Cursor, Zed, etc.) can call ClearSpeech tools directly.
 
 ---
 
-## MCP Server — Claude Code integration
+## MCP Server
 
-The `mcp-server/` folder contains a lightweight [Model Context Protocol](https://modelcontextprotocol.io) server. It lets Claude use ClearSpeech tools directly inside Claude Code — no need to open the web app.
+The `mcp-server/` folder contains a lightweight [Model Context Protocol](https://modelcontextprotocol.io) server. It works with any MCP-compatible client (Claude Code, Claude Desktop, Cursor, Zed, and others) — no need to open the web app.
 
 **Tools exposed:**
 
