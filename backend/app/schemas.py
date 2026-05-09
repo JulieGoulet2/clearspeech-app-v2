@@ -4,15 +4,15 @@ schemas.py — Request and response models for the ClearSpeech API.
 Pydantic validates the incoming JSON automatically, so invalid requests
 (missing fields, wrong types) are rejected before they reach the logic layer.
 """
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
 class RewriteRequest(BaseModel):
-    message: str = Field(..., min_length=1, description="User message")
-    language_hint: str = Field(
+    message: str = Field(..., min_length=1, max_length=500, description="User message")
+    language_hint: Literal["en", "fr", "de"] = Field(
         ...,
-        min_length=2,
-        max_length=2,
         description="Language hint: en, fr, or de",
     )
 
@@ -21,17 +21,17 @@ class ClarifyRequest(BaseModel):
     original_message: str = Field(
         ...,
         min_length=1,
+        max_length=500,
         description="Original user message",
     )
     clarification: str = Field(
         ...,
         min_length=1,
+        max_length=500,
         description="Clarification from the user",
     )
-    language_hint: str = Field(
+    language_hint: Literal["en", "fr", "de"] = Field(
         ...,
-        min_length=2,
-        max_length=2,
         description="Language hint: en, fr, or de",
     )
 

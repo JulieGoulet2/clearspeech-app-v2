@@ -14,7 +14,6 @@ creating a new connection on every request.
 from __future__ import annotations
 
 import os
-import time
 from io import BytesIO
 from typing import Optional
 
@@ -33,8 +32,6 @@ def get_client():
 
         if not api_key:
             raise RuntimeError("OPENAI_API_KEY is missing from environment")
-
-        print("[DEBUG] Creating OpenAI client, key prefix:", api_key[:7])
 
         _client = OpenAI(api_key=api_key)
 
@@ -117,15 +114,12 @@ def _call_model(user_input: str) -> str:
     Temperature is set very low (0.1) so the output is consistent and
     predictable — this is not a creative task.
     """
-    t0 = time.perf_counter()
     response = get_client().responses.create(
         model="gpt-4.1-mini",
         instructions=SYSTEM_PROMPT,
         input=user_input,
         temperature=0.1,
     )
-    elapsed = time.perf_counter() - t0
-    print(f"[TIMING] OpenAI call: {elapsed:.2f}s")
     return response.output_text.strip()
 
 
@@ -220,15 +214,6 @@ def transcribe_audio(audio_bytes: bytes, filename: str, language_hint: Optional[
     if not audio_bytes:
         raise ValueError("Audio file is empty")
 
-    print(
-        "[TRANSCRIBE] helper received file:",
-        filename,
-        "size_bytes:",
-        len(audio_bytes),
-        "language_hint:",
-        language_hint,
-    )
-
     file_obj = BytesIO(audio_bytes)
     file_obj.name = filename or "recording.webm"
 
@@ -239,14 +224,10 @@ def transcribe_audio(audio_bytes: bytes, filename: str, language_hint: Optional[
     if language_hint in {"en", "fr", "de"}:
         options["language"] = language_hint
 
-    t0 = time.perf_counter()
     transcript = get_client().audio.transcriptions.create(**options)
-    elapsed = time.perf_counter() - t0
-    print(f"[TRANSCRIBE] timing_s: {elapsed:.2f}")
 
     transcript_text = transcript.text if hasattr(transcript, "text") else str(transcript)
     transcript_text = (transcript_text or "").strip()
-    print("[TRANSCRIBE] transcript_len:", len(transcript_text))
 
     if not transcript_text:
         raise RuntimeError("Speech was recorded, but no transcript was produced.")

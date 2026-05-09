@@ -28,8 +28,8 @@ app.add_middleware(
     ],
     allow_origin_regex=r"https://clearspeech-app-v2.*\.vercel\.app",
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "X-Admin-Token"],
 )
 
 
@@ -55,8 +55,8 @@ async def rewrite(request: RewriteRequest):
             proposed_sentence=proposed_sentence,
             confirmation_question=confirmation_question,
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.")
 
 
 @app.post("/clarify", response_model=RewriteResponse, dependencies=[Depends(check_rate_limit)])
@@ -74,8 +74,8 @@ async def clarify(request: ClarifyRequest):
             proposed_sentence=proposed_sentence,
             confirmation_question=confirmation_question,
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.")
 
 
 @app.post("/transcribe", dependencies=[Depends(check_rate_limit)])
@@ -84,16 +84,7 @@ async def transcribe(
     language_hint: str = Form("en"),
 ):
     try:
-        print(
-            "[TRANSCRIBE] received:",
-            bool(audio),
-            "filename:",
-            audio.filename,
-            "content_type:",
-            audio.content_type,
-        )
         audio_bytes = await audio.read()
-        print("[TRANSCRIBE] size_bytes:", len(audio_bytes))
 
         transcript_text = logic.transcribe_audio(
             audio_bytes=audio_bytes,
@@ -110,6 +101,5 @@ async def transcribe(
         return {"transcript": transcript_text}
     except HTTPException:
         raise
-    except Exception as e:
-        print("[TRANSCRIBE] error:", repr(e))
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.")

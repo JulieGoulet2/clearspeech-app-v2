@@ -99,4 +99,4 @@ def test_post_transcribe_logic_error_returns_500(monkeypatch):
         data={"language_hint": "en"},
     )
     assert response.status_code == 500
-    assert "OpenAI API failure" in response.json()["detail"]
+    assert "internal error" in response.json()["detail"].lower()
