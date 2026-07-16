@@ -57,6 +57,23 @@ The frontend calls the backend API. The backend calls the OpenAI API (GPT-4.1-mi
 
 ---
 
+## Research
+
+ClearSpeech is an active research project as well as a working tool.
+
+In July 2026 it was submitted to Anthropic's **Claude Science — AI for Science** program, proposing a three-month study (September–December 2026) to:
+
+- characterise aphasia-specific linguistic degradation patterns across English, French, and German
+- systematically evaluate how large language models recover intent from fragmented, incomplete input
+- test adaptive, per-user prompting architectures — without model fine-tuning
+- release an annotated multilingual aphasia corpus as an open benchmark (CC-BY-4.0)
+
+The central hypothesis: for assistive tools, the right measure is not raw reconstruction accuracy but **confirmed communicative success** — a reconstruction the user has validated before it is used. This is why ClearSpeech always asks "Is this what you mean?" rather than answering directly.
+
+The backend currently runs on OpenAI models. **Claude integration is the focus of ClearSpeech v2** and forms the core of the proposed research.
+
+---
+
 ## MCP Server
 
 The `mcp-server/` folder contains a lightweight [Model Context Protocol](https://modelcontextprotocol.io) server. It works with any MCP-compatible client (Claude Code, Claude Desktop, Cursor, Zed, and others) — no need to open the web app.
