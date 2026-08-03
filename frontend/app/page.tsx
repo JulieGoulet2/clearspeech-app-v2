@@ -13,7 +13,7 @@
  * inserted into the text field.
  *
  * All user-facing text is in uiStrings.ts so the interface works in
- * English, French, and German.
+ * English, French, German, and Spanish.
  */
 "use client";
 
@@ -80,13 +80,13 @@ const btnCopy =
   `${btnBase} bg-emerald-800 text-white hover:bg-emerald-900 focus-visible:ring-emerald-600`;
 const btnSpeak =
   `${btnBase} min-h-0 min-w-0 px-4 py-2 text-sm border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50 focus-visible:ring-neutral-400 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800`;
+const TEAM_ACCESS_STORAGE_KEY = "clearspeech-team-access-code";
 
 /** Base URL for the backend API (no trailing slash). Null if NEXT_PUBLIC_API_URL is unset. */
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-const ADMIN_TOKEN = process.env.NEXT_PUBLIC_ADMIN_TOKEN ?? "";
 
-function apiHeaders(): HeadersInit {
-  return ADMIN_TOKEN ? { "X-Admin-Token": ADMIN_TOKEN } : {};
+function apiHeaders(teamAccessCode?: string): HeadersInit {
+  return teamAccessCode ? { "X-Admin-Token": teamAccessCode } : {};
 }
 if (!API_BASE_URL) {
   throw new Error("Missing NEXT_PUBLIC_API_URL environment variable");
@@ -153,12 +153,20 @@ function speak(text: string, language: string) {
 
   const synthesis = window.speechSynthesis;
   const primaryLangCode =
-    language === "fr" ? "fr-FR" : language === "de" ? "de-DE" : "en-US";
+    language === "fr"
+      ? "fr-FR"
+      : language === "de"
+        ? "de-DE"
+        : language === "es"
+          ? "es-ES"
+          : "en-US";
   const preferredLangCodes =
     language === "fr"
       ? ["fr-FR", "fr-CA", "fr"]
       : language === "de"
         ? ["de-DE", "de-AT", "de-CH", "de"]
+        : language === "es"
+          ? ["es-ES", "es-MX", "es-419", "es-US", "es"]
         : ["en-US", "en-GB", "en"];
 
   const speakWithVoices = (voices: SpeechSynthesisVoice[]) => {
@@ -223,6 +231,9 @@ export default function Home() {
   const [loadingKind, setLoadingKind] = useState<LoadingKind>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [teamAccessDraft, setTeamAccessDraft] = useState("");
+  const [teamAccessCode, setTeamAccessCode] = useState("");
+  const [isSavingTeamAccess, setIsSavingTeamAccess] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -252,6 +263,15 @@ export default function Home() {
   useEffect(() => {
     document.title = tr.title;
   }, [tr.title]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const storedCode = window.localStorage.getItem(TEAM_ACCESS_STORAGE_KEY) ?? "";
+    setTeamAccessDraft(storedCode);
+    if (!storedCode.trim()) return;
+
+    void validateAndStoreTeamAccessCode(storedCode, { fromStorage: true });
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -301,7 +321,77 @@ export default function Home() {
   }
 
   function languageToLocale(language: Lang): string {
-    return language === "fr" ? "fr" : language === "de" ? "de" : "en";
+    return language === "fr"
+      ? "fr"
+      : language === "de"
+        ? "de"
+        : language === "es"
+          ? "es"
+          : "en";
+  }
+
+  async function validateAndStoreTeamAccessCode(
+    rawCode: string,
+    options: { fromStorage?: boolean } = {},
+  ) {
+    const normalized = rawCode.trim();
+    setError("");
+    setNotice("");
+
+    if (!normalized) {
+      if (!options.fromStorage) {
+        setError(tr.teamAccessEmpty);
+      }
+      return;
+    }
+
+    setIsSavingTeamAccess(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/validate-team-access`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: normalized,
+          language_hint: "en",
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(response.status === 401 ? tr.teamAccessInvalid : tr.errorRequest);
+      }
+
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(TEAM_ACCESS_STORAGE_KEY, normalized);
+      }
+      setTeamAccessCode(normalized);
+      setTeamAccessDraft(normalized);
+      setNotice(options.fromStorage ? "" : tr.teamAccessSaved);
+    } catch (err) {
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem(TEAM_ACCESS_STORAGE_KEY);
+      }
+      setTeamAccessCode("");
+      setTeamAccessDraft(options.fromStorage ? "" : normalized);
+      if (!options.fromStorage) {
+        setError(getUserFriendlyRequestError(err, tr.errorUnknown));
+      }
+    } finally {
+      setIsSavingTeamAccess(false);
+    }
+  }
+
+  async function saveTeamAccessCode() {
+    await validateAndStoreTeamAccessCode(teamAccessDraft);
+  }
+
+  function clearTeamAccessCode() {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(TEAM_ACCESS_STORAGE_KEY);
+    }
+    setTeamAccessCode("");
+    setTeamAccessDraft("");
+    setNotice("");
   }
 
   async function handleStartRecording(target: "message" | "clarification" = "message") {
@@ -422,11 +512,11 @@ export default function Home() {
           });
           const response = await fetch(`${API_BASE_URL}/transcribe`, {
             method: "POST",
-            headers: apiHeaders(),
+            headers: apiHeaders(teamAccessCode),
             body: formData,
           });
           if (!response.ok) {
-            const msg = await parseApiError(response, !!ADMIN_TOKEN, tr.errorAdminToken, tr.errorRequest);
+            const msg = await parseApiError(response, !!teamAccessCode, tr.errorAdminToken, tr.errorRequest);
             throw new Error(msg);
           }
           const data: { transcript?: string; text?: string } = await response.json();
@@ -502,7 +592,7 @@ export default function Home() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...apiHeaders(),
+          ...apiHeaders(teamAccessCode),
         },
         body: JSON.stringify({
           message,
@@ -511,7 +601,7 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        const msg = await parseApiError(response, !!ADMIN_TOKEN, tr.errorAdminToken, tr.errorRequest);
+        const msg = await parseApiError(response, !!teamAccessCode, tr.errorAdminToken, tr.errorRequest);
         throw new Error(msg);
       }
 
@@ -548,7 +638,7 @@ export default function Home() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...apiHeaders(),
+          ...apiHeaders(teamAccessCode),
         },
         body: JSON.stringify({
           original_message: message,
@@ -558,7 +648,7 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        const msg = await parseApiError(response, !!ADMIN_TOKEN, tr.errorAdminToken, tr.errorRequest);
+        const msg = await parseApiError(response, !!teamAccessCode, tr.errorAdminToken, tr.errorRequest);
         throw new Error(msg);
       }
 
@@ -652,6 +742,56 @@ export default function Home() {
           <p>{tr.testingNote}</p>
         </div>
 
+        <section className={cardClass} aria-label={tr.teamAccessTitle}>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                {tr.teamAccessTitle}
+              </h2>
+              <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+                {tr.teamAccessBody}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label
+                className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                htmlFor="team-access-code"
+              >
+                {tr.teamAccessLabel}
+              </label>
+              <input
+                id="team-access-code"
+                type="password"
+                value={teamAccessDraft}
+                onChange={(e) => setTeamAccessDraft(e.target.value)}
+                placeholder={tr.teamAccessPlaceholder}
+                className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base shadow-sm focus:border-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400/40 dark:border-neutral-600 dark:bg-neutral-900"
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                className={btnSecondary}
+                onClick={saveTeamAccessCode}
+                disabled={isSavingTeamAccess}
+              >
+                {isSavingTeamAccess ? tr.teamAccessValidating : tr.teamAccessSave}
+              </button>
+              <button type="button" className={btnSecondary} onClick={clearTeamAccessCode}>
+                {tr.teamAccessClear}
+              </button>
+            </div>
+
+            {teamAccessCode && (
+              <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                {tr.teamAccessActive}
+              </p>
+            )}
+          </div>
+        </section>
+
         {!API_BASE_URL && (
           <div
             className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm leading-relaxed text-rose-950 shadow-sm dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-100"
@@ -680,6 +820,7 @@ export default function Home() {
             <option value="en">English</option>
             <option value="fr">Français</option>
             <option value="de">Deutsch</option>
+            <option value="es">Español</option>
           </select>
         </section>
 

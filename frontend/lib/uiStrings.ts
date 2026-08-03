@@ -1,13 +1,13 @@
 /**
  * uiStrings.ts — All user-facing text for the ClearSpeech interface.
  *
- * Every string shown to the user lives here, in English, French, and German.
+ * Every string shown to the user lives here, in English, French, German, and Spanish.
  * To add a new language: add a new key to the Lang type and a new entry in
  * UI_STRINGS following the same structure as the existing languages.
  *
  * Usage: import { t } from "../lib/uiStrings" then call t(lang).someKey
  */
-export type Lang = "en" | "fr" | "de";
+export type Lang = "en" | "fr" | "de" | "es";
 
 export type UiStrings = {
   title: string;
@@ -65,6 +65,17 @@ export type UiStrings = {
   helpVoiceReadAloud: string;
   helpVoiceDictation: string;
   testingNote: string;
+  teamAccessTitle: string;
+  teamAccessBody: string;
+  teamAccessLabel: string;
+  teamAccessPlaceholder: string;
+  teamAccessSave: string;
+  teamAccessClear: string;
+  teamAccessActive: string;
+  teamAccessValidating: string;
+  teamAccessInvalid: string;
+  teamAccessEmpty: string;
+  teamAccessSaved: string;
 };
 
 export const UI_STRINGS: Record<Lang, UiStrings> = {
@@ -96,7 +107,7 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
     errorUnknown: "Unknown error",
     errorCopy: "Copy failed.",
     errorRequest: "Request failed",
-    errorAdminToken: "Daily limit reached even with admin token — the token may be incorrect. Check NEXT_PUBLIC_ADMIN_TOKEN and ADMIN_TOKEN in your environment settings.",
+    errorAdminToken: "Daily limit reached even with a privileged access code. Check ADMIN_TOKEN or TEAM_ACCESS_TOKEN in your environment settings.",
     helpTitle: "ℹ️ Help — how this app works",
     helpWhatTitle: "What this app does",
     helpWhatBody:
@@ -132,6 +143,18 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
       "You can dictate your message using the 🎤 Voice input button instead of typing.",
     testingNote:
       "There is a limit of about 15 complete conversations per day during the testing period. For more access, contact drjuliegoulet@gmail.com",
+    teamAccessTitle: "Team access",
+    teamAccessBody:
+      "If you are part of the ClearSpeech team, enter your team access code here to remove the daily testing limit on this device.",
+    teamAccessLabel: "Team access code",
+    teamAccessPlaceholder: "Enter team access code",
+    teamAccessSave: "Save code",
+    teamAccessClear: "Clear code",
+    teamAccessActive: "Team access is active on this device.",
+    teamAccessValidating: "Checking code...",
+    teamAccessInvalid: "This access code is not valid.",
+    teamAccessEmpty: "Enter an access code first.",
+    teamAccessSaved: "Access code verified and saved on this device.",
   },
   fr: {
     title: "ClearSpeech",
@@ -161,7 +184,7 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
     errorUnknown: "Erreur inconnue",
     errorCopy: "La copie a échoué.",
     errorRequest: "La requête a échoué",
-    errorAdminToken: "Limite journalière atteinte malgré le token administrateur — le token est peut-être incorrect. Vérifie NEXT_PUBLIC_ADMIN_TOKEN et ADMIN_TOKEN dans tes paramètres d'environnement.",
+    errorAdminToken: "Limite journalière atteinte malgré un code d’accès privilégié — le code est peut-être incorrect. Vérifie ADMIN_TOKEN ou TEAM_ACCESS_TOKEN dans tes paramètres d'environnement.",
     helpTitle: "ℹ️ Aide — comment utiliser l’application",
     helpWhatTitle: "Ce que fait l’application",
     helpWhatBody:
@@ -202,6 +225,18 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
       "Tu peux dicter ton message avec le bouton 🎤 Saisie vocale au lieu de taper.",
     testingNote:
       "Il y a une limite d'environ 15 conversations complètes par jour pendant la période de test. Pour plus d'accès, contacte drjuliegoulet@gmail.com",
+    teamAccessTitle: "Accès équipe",
+    teamAccessBody:
+      "Si tu fais partie de l’équipe ClearSpeech, entre ici ton code d’accès équipe pour supprimer la limite quotidienne de test sur cet appareil.",
+    teamAccessLabel: "Code d’accès équipe",
+    teamAccessPlaceholder: "Entre le code d’accès équipe",
+    teamAccessSave: "Enregistrer le code",
+    teamAccessClear: "Effacer le code",
+    teamAccessActive: "L’accès équipe est actif sur cet appareil.",
+    teamAccessValidating: "Vérification du code...",
+    teamAccessInvalid: "Ce code d’accès n’est pas valide.",
+    teamAccessEmpty: "Entre d’abord un code d’accès.",
+    teamAccessSaved: "Code d’accès vérifié et enregistré sur cet appareil.",
   },
   de: {
     title: "ClearSpeech",
@@ -231,7 +266,7 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
     errorUnknown: "Unbekannter Fehler",
     errorCopy: "Kopieren fehlgeschlagen.",
     errorRequest: "Anfrage fehlgeschlagen",
-    errorAdminToken: "Tageslimit trotz Admin-Token erreicht — das Token ist möglicherweise falsch. Prüfe NEXT_PUBLIC_ADMIN_TOKEN und ADMIN_TOKEN in deinen Umgebungseinstellungen.",
+    errorAdminToken: "Tageslimit trotz privilegiertem Zugangscode erreicht — der Code ist möglicherweise falsch. Prüfe ADMIN_TOKEN oder TEAM_ACCESS_TOKEN in deinen Umgebungseinstellungen.",
     helpTitle: "ℹ️ Hilfe — so funktioniert die App",
     helpWhatTitle: "Was die App macht",
     helpWhatBody:
@@ -272,11 +307,106 @@ export const UI_STRINGS: Record<Lang, UiStrings> = {
       "Du kannst deine Nachricht mit dem Knopf 🎤 Spracheingabe diktieren, anstatt zu tippen.",
     testingNote:
       "Während der Testphase gibt es ein Limit von etwa 15 vollständigen Gesprächen pro Tag. Für mehr Zugang, kontaktiere drjuliegoulet@gmail.com",
+    teamAccessTitle: "Teamzugang",
+    teamAccessBody:
+      "Wenn du zum ClearSpeech-Team gehörst, gib hier deinen Teamzugangscode ein, um das tägliche Testlimit auf diesem Gerät aufzuheben.",
+    teamAccessLabel: "Teamzugangscode",
+    teamAccessPlaceholder: "Teamzugangscode eingeben",
+    teamAccessSave: "Code speichern",
+    teamAccessClear: "Code löschen",
+    teamAccessActive: "Der Teamzugang ist auf diesem Gerät aktiv.",
+    teamAccessValidating: "Code wird geprüft...",
+    teamAccessInvalid: "Dieser Zugangscode ist ungültig.",
+    teamAccessEmpty: "Gib zuerst einen Zugangscode ein.",
+    teamAccessSaved: "Zugangscode geprüft und auf diesem Gerät gespeichert.",
+  },
+  es: {
+    title: "ClearSpeech",
+    subtitle: "Asistente de comunicación con IA",
+    languageLabel: "Idioma / Language / Langue / Sprache",
+    yourMessage: "Tu mensaje",
+    placeholder: "Escribe tu mensaje aquí...",
+    getClearer: "Obtener una versión más clara",
+    proposedVersion: "Versión propuesta",
+    suggestedSentence: "Frase propuesta",
+    questionLabel: "Pregunta",
+    yes: "Sí",
+    no: "No",
+    startOver: "Empezar de nuevo",
+    clarifyTitle: "¿Qué quieres decir exactamente?",
+    yourAnswer: "Tu respuesta",
+    clarifyPlaceholder: "Explica tu intención en pocas palabras...",
+    updateSuggestion: "Actualizar propuesta",
+    finalText: "Texto final",
+    copy: "📋 Copiar!",
+    newMessage: "Nuevo mensaje",
+    loadingImprove: "Mejorando tu frase...",
+    loadingUpdate: "Actualizando la propuesta...",
+    errorApi: "Algo salió mal. Inténtalo de nuevo.",
+    errorEmptyMessage: "Primero escribe un mensaje.",
+    errorEmptyClarification: "Primero añade una aclaración.",
+    errorUnknown: "Error desconocido",
+    errorCopy: "La copia falló.",
+    errorRequest: "La solicitud falló",
+    errorAdminToken:
+      "Se alcanzó el límite diario incluso con un código de acceso privilegiado; puede que el código sea incorrecto. Revisa ADMIN_TOKEN o TEAM_ACCESS_TOKEN en la configuración del entorno.",
+    helpTitle: "ℹ️ Ayuda — cómo funciona esta aplicación",
+    helpWhatTitle: "Qué hace esta aplicación",
+    helpWhatBody:
+      "ClearSpeech convierte un mensaje corto o poco claro en una frase clara que puedes usar en la vida real. Está pensada para personas a quienes les cuesta escribir o encontrar las palabras adecuadas.",
+    helpHowTitle: "Cómo usarla (paso a paso)",
+    helpStep1: "Escribe tu mensaje en el cuadro (unas pocas palabras bastan).",
+    helpStep2:
+      'Pulsa "Obtener una versión más clara". La aplicación propone una frase más clara y hace una pregunta sencilla.',
+    helpStep3:
+      'Responde "Sí" si coincide con lo que quieres decir, o "No" si no coincide.',
+    helpStep4:
+      'Si pulsas "No", puedes añadir una breve aclaración. La aplicación actualiza la propuesta.',
+    helpStep5:
+      "Cuando estés conforme, llegarás al texto final y podrás copiarlo.",
+    helpTipsTitle: "Conviene saber",
+    helpIncomplete:
+      "Las entradas incompletas están bien; no necesitas ortografía ni gramática perfectas.",
+    helpCopyNote:
+      "La frase final se puede copiar con el botón de copiar para pegarla en otro sitio.",
+    helpContact: "Contacto",
+    helpModel:
+      "Las propuestas se generan con el modelo GPT-4.1 mini de OpenAI.",
+    helpShow: "Mostrar instrucciones",
+    helpHide: "Ocultar instrucciones",
+    readAloud: "🔊 Leer en voz alta",
+    firstRequestNote: "La primera solicitud puede tardar más después de un periodo de inactividad.",
+    voiceInputBetaLabel: "🎤 Entrada de voz (Beta)",
+    voiceInputBetaStopLabel: "🔴 Detener entrada de voz (Beta)",
+    voiceInputBetaNote:
+      "Opcional: escribe o usa la voz, como prefieras. Pulsa el botón, espera unos 10 segundos y luego habla. La entrada de voz está en beta y puede no ser perfecta.",
+    voiceInputSafariWarning:
+      "El dictado por voz funciona mejor en Safari o Chrome. Usa el teclado en este navegador.",
+    voiceInputSafariOnlyNote: "⚠️ El dictado por voz está disponible en Safari y Chrome.",
+    helpVoiceTitle: "Funciones de voz y audio",
+    helpVoiceReadAloud:
+      "Todos los textos de la aplicación pueden leerse en voz alta con los botones 🔊 Leer en voz alta.",
+    helpVoiceDictation:
+      "Puedes dictar tu mensaje con el botón 🎤 Entrada de voz en lugar de escribir.",
+    testingNote:
+      "Durante el periodo de prueba hay un límite de unas 15 conversaciones completas por día. Para más acceso, contacta con drjuliegoulet@gmail.com",
+    teamAccessTitle: "Acceso del equipo",
+    teamAccessBody:
+      "Si formas parte del equipo de ClearSpeech, introduce aquí tu código de acceso del equipo para quitar el límite diario de pruebas en este dispositivo.",
+    teamAccessLabel: "Código de acceso del equipo",
+    teamAccessPlaceholder: "Introduce el código de acceso del equipo",
+    teamAccessSave: "Guardar código",
+    teamAccessClear: "Borrar código",
+    teamAccessActive: "El acceso del equipo está activo en este dispositivo.",
+    teamAccessValidating: "Comprobando el código...",
+    teamAccessInvalid: "Este código de acceso no es válido.",
+    teamAccessEmpty: "Primero introduce un código de acceso.",
+    teamAccessSaved: "Código de acceso verificado y guardado en este dispositivo.",
   },
 };
 
 export function isLang(value: string): value is Lang {
-  return value === "en" || value === "fr" || value === "de";
+  return value === "en" || value === "fr" || value === "de" || value === "es";
 }
 
 export function t(lang: string): UiStrings {

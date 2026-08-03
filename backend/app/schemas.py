@@ -11,9 +11,9 @@ from pydantic import BaseModel, Field
 
 class RewriteRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=500, description="User message")
-    language_hint: Literal["en", "fr", "de"] = Field(
+    language_hint: Literal["en", "fr", "de", "es"] = Field(
         ...,
-        description="Language hint: en, fr, or de",
+        description="Language hint: en, fr, de, or es",
     )
 
 
@@ -30,9 +30,9 @@ class ClarifyRequest(BaseModel):
         max_length=500,
         description="Clarification from the user",
     )
-    language_hint: Literal["en", "fr", "de"] = Field(
+    language_hint: Literal["en", "fr", "de", "es"] = Field(
         ...,
-        description="Language hint: en, fr, or de",
+        description="Language hint: en, fr, de, or es",
     )
 
 

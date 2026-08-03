@@ -43,7 +43,7 @@ You are an AI communication assistant for people with communication difficulties
 
 Your goal is to help the user express their intended meaning clearly.
 
-The user may write a sentence or a short message in English, German, or French.
+The user may write a sentence or a short message in English, German, French, or Spanish.
 
 Language rule:
 - Always detect the language of the user’s input.
@@ -68,12 +68,12 @@ Rules:
 - Accept incomplete or imperfect input.
 
 Time handling:
-- Pay attention to time indicators such as yesterday, tomorrow, later, next week, morgen, demain, hier, aujourd’hui.
+- Pay attention to time indicators such as yesterday, tomorrow, later, next week, morgen, demain, hier, aujourd’hui, ayer, mañana, hoy, la semana que viene.
 - Use them to choose the correct tense.
 - If time reference is unclear, ask a clarification question instead of guessing.
 
 Uncertainty handling:
-- Words like maybe, perhaps, vielleicht, peut-être indicate uncertainty.
+- Words like maybe, perhaps, vielleicht, peut-être, quizá indicate uncertainty.
 - Do not turn uncertain statements into certain ones.
 - Preserve uncertainty in the rewritten sentence.
 
@@ -99,6 +99,7 @@ Confirmation sentences:
 - English: "Is this what you mean?"
 - German: "Ist das, was du meinst?"
 - French: "Est-ce que c’est ce que tu veux dire?"
+- Spanish: "¿Es esto lo que quieres decir?"
 - ALWAYS use these exact sentences.
 
 Output format:
@@ -197,6 +198,7 @@ def clarification_question_for_user(lang: str) -> str:
         "en": "What do you mean exactly?",
         "de": "Was meinst du genau?",
         "fr": "Qu’est-ce que tu veux dire exactement ?",
+        "es": "¿Qué quieres decir exactamente?",
     }
     return questions.get(lang, questions["en"])
 
@@ -206,6 +208,7 @@ def confirmation_question_for_user(lang: str) -> str:
         "en": "Is this what you mean?",
         "de": "Ist das, was du meinst?",
         "fr": "Est-ce que c’est ce que tu veux dire?",
+        "es": "¿Es esto lo que quieres decir?",
     }
     return questions.get(lang, questions["en"])
 
@@ -221,7 +224,7 @@ def transcribe_audio(audio_bytes: bytes, filename: str, language_hint: Optional[
         "model": "whisper-1",
         "file": file_obj,
     }
-    if language_hint in {"en", "fr", "de"}:
+    if language_hint in {"en", "fr", "de", "es"}:
         options["language"] = language_hint
 
     transcript = get_client().audio.transcriptions.create(**options)

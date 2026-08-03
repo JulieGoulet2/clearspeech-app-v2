@@ -37,9 +37,11 @@ Over 2 million people in Europe alone live with aphasia. Millions more have cogn
 4. If No, you add one short clarification — the app updates the suggestion
 5. When you are happy, you see the final text and can copy it
 
-**Languages supported:** English, French, German
+**Languages supported:** English, French, German, Spanish
 
 **Voice input (beta):** You can dictate your message instead of typing. The audio is transcribed by OpenAI Whisper.
+
+**Team access:** Team members can enter a private access code in the app to remove the daily testing limit on their device. The code is validated by the backend before it is stored locally.
 
 **Read aloud:** Any text in the app can be read aloud using the browser's text-to-speech.
 
@@ -63,7 +65,7 @@ ClearSpeech is an active research project as well as a working tool.
 
 In July 2026 it was submitted to Anthropic's **Claude Science — AI for Science** program, proposing a three-month study (September–December 2026) to:
 
-- characterise aphasia-specific linguistic degradation patterns across English, French, and German
+- characterise aphasia-specific linguistic degradation patterns across English, French, German, and Spanish
 - systematically evaluate how large language models recover intent from fragmented, incomplete input
 - test adaptive, per-user prompting architectures — without model fine-tuning
 - release an annotated multilingual aphasia corpus as an open benchmark (CC-BY-4.0)
@@ -141,7 +143,7 @@ frontend/
     page.tsx        Main page component
     layout.tsx      App layout
   lib/
-    uiStrings.ts    All user-facing text (EN / FR / DE)
+    uiStrings.ts    All user-facing text (EN / FR / DE / ES)
     audioUtils.ts   Audio conversion utility (WAV encoding)
   __tests__/
     page.test.tsx       Core page behavior tests
@@ -173,6 +175,7 @@ Create a `.env` file in `backend/`:
 ```
 OPENAI_API_KEY=your-key-here
 ADMIN_TOKEN=a-secret-token-for-unlimited-testing
+TEAM_ACCESS_TOKEN=a-secret-token-for-team-members
 ```
 
 Start the server:
@@ -190,15 +193,57 @@ npm install
 Create a `.env.local` file in `frontend/`:
 ```
 NEXT_PUBLIC_API_URL=http://localhost:8000
-NEXT_PUBLIC_ADMIN_TOKEN=a-secret-token-for-unlimited-testing
 ```
 
-> **Warning:** `NEXT_PUBLIC_ADMIN_TOKEN` is for local development only. Never set it in a production environment (Vercel, etc.) — `NEXT_PUBLIC_` variables are embedded in the JavaScript bundle and visible to anyone who inspects the page.
+If you want unlimited local access in the browser, enter the same `ADMIN_TOKEN` or `TEAM_ACCESS_TOKEN` in the app's **Team access** field. The frontend sends it to the backend for validation and then stores it locally on that device.
 
 Start the dev server:
 ```bash
 npm run dev
 ```
+
+---
+
+## Making team access work online
+
+The team access code must be stored on the **backend deployment**, not in the frontend and not in Git.
+
+### Backend deployment (Render)
+
+In the Render environment variables for the backend service, set:
+
+```text
+OPENAI_API_KEY=your-openai-api-key
+TEAM_ACCESS_TOKEN=your-secret-team-code
+ADMIN_TOKEN=optional-second-secret-for-you
+```
+
+- `TEAM_ACCESS_TOKEN` is the code your friend or team members enter in the app
+- `ADMIN_TOKEN` is optional and can be kept just for you
+- after saving the variables in Render, redeploy the backend
+
+### Frontend deployment (Vercel)
+
+In the Vercel environment variables for the frontend, set only:
+
+```text
+NEXT_PUBLIC_API_URL=https://your-backend-url.onrender.com
+```
+
+Do **not** put `TEAM_ACCESS_TOKEN` or `ADMIN_TOKEN` in Vercel, because frontend variables are exposed to the browser.
+
+### What happens in the app
+
+1. A team member enters the code in the **Team access** box
+2. The frontend sends that code to the backend `/validate-team-access` endpoint
+3. If the code matches `TEAM_ACCESS_TOKEN` or `ADMIN_TOKEN`, the backend approves it
+4. The browser stores the code locally on that device for later use
+
+This means:
+
+- the secret itself lives online on Render
+- each team member saves it locally in their own browser after validation
+- the secret is never published in the frontend bundle
 
 ---
 
@@ -216,7 +261,7 @@ python -m pytest -v
 | File | What it covers |
 |------|----------------|
 | `test_api.py` | `/rewrite`, `/clarify`, `/transcribe` endpoints |
-| `test_logic_helpers.py` | Confirmation and clarification question strings (EN/FR/DE) |
+| `test_logic_helpers.py` | Confirmation and clarification question strings (EN/FR/DE/ES) |
 | `test_logic_model.py` | AI rewrite logic with mocked model output |
 | `test_rate_limit.py` | 50 req/day limit, admin bypass, 24h reset, multi-user isolation |
 
@@ -233,7 +278,7 @@ npm test
 
 Normal users are limited to **50 requests per IP per 24 hours** (about 15 complete conversations).
 
-If you want unlimited access for local testing, set `ADMIN_TOKEN` in the backend `.env` and `NEXT_PUBLIC_ADMIN_TOKEN` to the same value in the frontend `.env.local`. Do not set `NEXT_PUBLIC_ADMIN_TOKEN` in production — it is visible in the JavaScript bundle.
+If you want unlimited access for local testing, set `ADMIN_TOKEN` or `TEAM_ACCESS_TOKEN` in the backend `.env`, then enter that code in the app's **Team access** field. The code is checked by the backend and never needs to be exposed as a `NEXT_PUBLIC_` frontend variable.
 
 ---
 
