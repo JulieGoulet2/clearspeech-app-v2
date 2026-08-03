@@ -17,8 +17,7 @@ FAKE_AUDIO_B64 = base64.b64encode(b"fake audio bytes").decode()
 @pytest.mark.anyio
 async def test_transcribe_returns_transcript_label(mock_transcribe_success):
     result = await server._handle_transcribe(FAKE_AUDIO_B64, "recording.webm", "en")
-    assert len(result) == 1
-    assert result[0].text == "Transcript: I want to sleep."
+    assert result == "Transcript: I want to sleep."
 
 
 @pytest.mark.anyio
@@ -59,15 +58,13 @@ async def test_transcribe_invalid_base64_returns_error():
             return_value=httpx.Response(200, json={"transcript": "ok"})
         )
         result = await server._handle_transcribe("not-valid-base64!!!", "recording.webm", "en")
-        assert len(result) == 1
-        assert "Error" in result[0].text
-        assert "base64" in result[0].text.lower()
+        assert "Error" in result
+        assert "base64" in result.lower()
         assert not route.called
 
 
 @pytest.mark.anyio
 async def test_transcribe_backend_400_returns_error(mock_backend_400_transcribe):
     result = await server._handle_transcribe(FAKE_AUDIO_B64, "recording.webm", "en")
-    assert len(result) == 1
-    assert result[0].text.startswith("Error:")
-    assert "400" in result[0].text
+    assert result.startswith("Error:")
+    assert "400" in result

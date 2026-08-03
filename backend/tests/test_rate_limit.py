@@ -81,6 +81,18 @@ def test_admin_user_never_blocked(monkeypatch):
         assert r.status_code == 200, f"Admin request {i + 1} should succeed but got {r.status_code}"
 
 
+def test_team_access_user_never_blocked(monkeypatch):
+    monkeypatch.setattr(
+        "app.main.logic.propose_rewrite_and_question",
+        lambda msg, lang: ("Sentence.", "Question?"),
+    )
+    monkeypatch.setenv("TEAM_ACCESS_TOKEN", "team-secret-token")
+
+    for i in range(rate_limit.DAILY_LIMIT + 10):
+        r = _rewrite(headers={"X-Admin-Token": "team-secret-token"})
+        assert r.status_code == 200, f"Team request {i + 1} should succeed but got {r.status_code}"
+
+
 def test_rate_limit_resets_after_24_hours(monkeypatch):
     monkeypatch.setattr(
         "app.main.logic.propose_rewrite_and_question",
@@ -133,6 +145,20 @@ def test_wrong_admin_token_is_rate_limited(monkeypatch):
         _rewrite()
 
     # Wrong token must NOT bypass the limit
+    r = _rewrite(headers={"X-Admin-Token": "wrong-token"})
+    assert r.status_code == 429
+
+
+def test_wrong_team_token_is_rate_limited(monkeypatch):
+    monkeypatch.setattr(
+        "app.main.logic.propose_rewrite_and_question",
+        lambda msg, lang: ("Sentence.", "Question?"),
+    )
+    monkeypatch.setenv("TEAM_ACCESS_TOKEN", "correct-team-token")
+
+    for _ in range(rate_limit.DAILY_LIMIT):
+        _rewrite()
+
     r = _rewrite(headers={"X-Admin-Token": "wrong-token"})
     assert r.status_code == 429
 

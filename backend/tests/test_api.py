@@ -100,3 +100,27 @@ def test_post_transcribe_logic_error_returns_500(monkeypatch):
     )
     assert response.status_code == 500
     assert "internal error" in response.json()["detail"].lower()
+
+
+def test_validate_team_access_returns_200_for_team_token(monkeypatch):
+    monkeypatch.setenv("TEAM_ACCESS_TOKEN", "team-secret-token")
+
+    response = client.post(
+        "/validate-team-access",
+        json={"message": "team-secret-token", "language_hint": "en"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"valid": True}
+
+
+def test_validate_team_access_returns_401_for_invalid_token(monkeypatch):
+    monkeypatch.setenv("TEAM_ACCESS_TOKEN", "team-secret-token")
+
+    response = client.post(
+        "/validate-team-access",
+        json={"message": "wrong-token", "language_hint": "en"},
+    )
+
+    assert response.status_code == 401
+    assert "invalid access code" in response.json()["detail"].lower()

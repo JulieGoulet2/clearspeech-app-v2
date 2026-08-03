@@ -3,6 +3,7 @@ Simple in-memory rate limiter.
 
 - 50 requests per IP per 24 hours for regular users.
 - Requests with a valid X-Admin-Token header are unlimited.
+- The header may match either ADMIN_TOKEN or TEAM_ACCESS_TOKEN.
 """
 from __future__ import annotations
 
@@ -21,6 +22,18 @@ _lock = Lock()
 _requests: dict[str, list[float]] = defaultdict(list)
 
 
+def _privileged_tokens() -> set[str]:
+    admin_token = os.environ.get("ADMIN_TOKEN", "").strip()
+    team_access_token = os.environ.get("TEAM_ACCESS_TOKEN", "").strip()
+    return {token for token in (admin_token, team_access_token) if token}
+
+
+def is_privileged_token(token: str | None) -> bool:
+    if not token:
+        return False
+    return token in _privileged_tokens()
+
+
 def _get_ip(request: Request) -> str:
     forwarded_for = request.headers.get("X-Forwarded-For")
     if forwarded_for:
@@ -33,8 +46,7 @@ def check_rate_limit(
     x_admin_token: Optional[str] = Header(default=None),
 ) -> None:
     """FastAPI dependency — raises 429 when the daily limit is reached."""
-    admin_token = os.environ.get("ADMIN_TOKEN", "").strip()
-    if admin_token and x_admin_token == admin_token:
+    if is_privileged_token(x_admin_token):
         return  # unlimited for admin
 
     ip = _get_ip(request)

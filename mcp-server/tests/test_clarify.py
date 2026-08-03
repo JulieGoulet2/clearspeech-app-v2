@@ -14,10 +14,8 @@ import server
 @pytest.mark.anyio
 async def test_clarify_returns_labeled_output(mock_clarify_success):
     result = await server._handle_clarify("me tired want doctor", "tomorrow morning", "en")
-    assert len(result) == 1
-    text = result[0].text
-    assert "Proposed sentence:" in text
-    assert "Confirmation question:" in text
+    assert "Proposed sentence:" in result
+    assert "Confirmation question:" in result
 
 
 @pytest.mark.anyio
@@ -43,22 +41,19 @@ async def test_clarify_sends_correct_json_body():
 @pytest.mark.anyio
 async def test_clarify_backend_500_returns_error_text(mock_backend_500_clarify):
     result = await server._handle_clarify("some message", "some clarification", "en")
-    assert len(result) == 1
-    assert result[0].text.startswith("Error:")
-    assert "500" in result[0].text
+    assert result.startswith("Error:")
+    assert "500" in result
 
 
 @pytest.mark.anyio
 async def test_clarify_empty_original_returns_error():
     result = await server._handle_clarify("", "some clarification", "en")
-    assert len(result) == 1
-    assert "Error" in result[0].text
-    assert "empty" in result[0].text.lower()
+    assert "Error" in result
+    assert "empty" in result.lower()
 
 
 @pytest.mark.anyio
 async def test_clarify_empty_clarification_returns_error():
     result = await server._handle_clarify("some message", "", "en")
-    assert len(result) == 1
-    assert "Error" in result[0].text
-    assert "empty" in result[0].text.lower()
+    assert "Error" in result
+    assert "empty" in result.lower()

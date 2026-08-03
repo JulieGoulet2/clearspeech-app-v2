@@ -8,25 +8,40 @@ Exposes three endpoints:
 
 All POST endpoints are rate-limited (50 requests per IP per 24 hours).
 Requests with a valid X-Admin-Token header bypass the limit.
+The header may match either ADMIN_TOKEN or TEAM_ACCESS_TOKEN.
 """
+import os
+
 from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.rate_limit import check_rate_limit
+from app.rate_limit import check_rate_limit, is_privileged_token
 from app.schemas import RewriteRequest, ClarifyRequest, RewriteResponse
 from app import logic
 
 app = FastAPI(title="ClearSpeech API")
 
+DEFAULT_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+DEFAULT_ALLOWED_ORIGIN_REGEX = r"https://.*\.vercel\.app"
+
+
+def _allowed_origins() -> list[str]:
+    configured = os.environ.get("CORS_ALLOW_ORIGINS", "").strip()
+    if not configured:
+        return DEFAULT_ALLOWED_ORIGINS
+    return [origin.strip() for origin in configured.split(",") if origin.strip()]
+
+
+def _allowed_origin_regex() -> str:
+    return os.environ.get("CORS_ALLOW_ORIGIN_REGEX", DEFAULT_ALLOWED_ORIGIN_REGEX).strip()
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://clearspeech-app-v2.vercel.app",
-        "https://clearspeech-app-v2-jei8rmyzz-juliegoulet2s-projects.vercel.app",
-    ],
-    allow_origin_regex=r"https://clearspeech-app-v2.*\.vercel\.app",
+    allow_origins=_allowed_origins(),
+    allow_origin_regex=_allowed_origin_regex(),
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type", "X-Admin-Token"],
@@ -41,6 +56,16 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.post("/validate-team-access")
+async def validate_team_access(request: RewriteRequest):
+    token = request.message.strip()
+    if not token:
+        raise HTTPException(status_code=400, detail="Access code is required.")
+    if not is_privileged_token(token):
+        raise HTTPException(status_code=401, detail="Invalid access code.")
+    return {"valid": True}
 
 
 @app.post("/rewrite", response_model=RewriteResponse, dependencies=[Depends(check_rate_limit)])

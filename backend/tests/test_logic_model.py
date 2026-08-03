@@ -26,7 +26,7 @@ def test_propose_rewrite_after_clarification_two_lines(monkeypatch):
     assert confirmation == "Is this OK?"
 
 
-@pytest.mark.parametrize("lang", ["en", "fr", "de"])
+@pytest.mark.parametrize("lang", ["en", "fr", "de", "es"])
 def test_propose_rewrite_and_question_one_line_uses_confirmation_fallback(
     monkeypatch, lang
 ):
@@ -39,7 +39,7 @@ def test_propose_rewrite_and_question_one_line_uses_confirmation_fallback(
     assert confirmation == logic.confirmation_question_for_user(lang)
 
 
-@pytest.mark.parametrize("lang", ["en", "fr", "de"])
+@pytest.mark.parametrize("lang", ["en", "fr", "de", "es"])
 def test_propose_rewrite_after_clarification_one_line_uses_confirmation_fallback(
     monkeypatch, lang
 ):
